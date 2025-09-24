@@ -2,7 +2,7 @@ import os, sqlite3, io, json, secrets
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import qrcode
 import stripe
-from flask_mail import Mail, Message
+from flaflask_mailman import Mail, Message
 from io import BytesIO
 from functools import wraps
 from werkzeug.utils import secure_filename
