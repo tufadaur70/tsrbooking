@@ -4,12 +4,11 @@ import qrcode
 import stripe
 from flask_mail import Mail, Message
 from io import BytesIO
-from barcode import EAN13
-from barcode.writer import ImageWriter
 from functools import wraps
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
+
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'   
