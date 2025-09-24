@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 style="text-align:center; margin-bottom: 24px;">SELEZIONA I POSTI</h2>
+
+<div>
+  <form method="post" id="seats-form" style="display: flex; width: 100%;">
+    <!-- Colonna 1: Piantina -->
+    <div class="booking-col booking-main">
+      <h2 style="text-align:center; margin-bottom: 12px;">PALCOSCENICO</h2>
+      <div class="seatmap-wrapper">
+        <div class="seatmap">
+          {% for row_letter in row_letters %}
+          {% if loop.index0 == 7 %}
+          <div class="seatmap-corridor-horizontal"></div>
+          {% endif %}
+          <div class="seat-row">
+            {% for col in range(1, cols+1)|reverse %}
+            {% if col == 14 %}
+            <span class="seatmap-corridor-vertical"></span>
+            {% endif %}
+            {% set seat = row_letter ~ col %}
+            {% if seat in unavailable %}
+            <!-- Non mostrare il posto -->
+            {% elif seat in booked_seats %}
+            <span class="seat booked" title="{{ seat }}"></span>
+            {% else %}
+            <label class="seat" title="{{ seat }}">
+              <input type="checkbox" name="seats" value="{{ seat }}" onchange="updateSelectedSeats()">
+
+            </label>
+            {% endif %}
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonna 2: Info evento, stato, legenda, form -->
+    <div class="booking-col booking-side">
+      <h2 style="text-align:center;">{{ event.title }}</h2>
+      <div style="color:#555; margin-bottom:10px; text-align:center;">Data: {{ event.date }}</div>
+      <div style="color:#555; margin-bottom:10px; text-align:center;">Orario: {{ event.time }}</div>
+      {% if event.poster_url %}
+      <img src="{{ event.poster_url }}" alt="Locandina evento" class="event-poster">
+      {% else %}
+      <div class="event-poster-placeholder">Nessuna locandina</div>
+      {% endif %}
+      <div id="selected-seats" class="selected-seats-box">
+        Nessun posto selezionato.
+      </div>
+      <div class="form-group">
+        <label for="name"><b>Nome:</b></label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label for="email"><b>Email:</b></label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div class="total-box">
+        Totale: <span id="total-price">0</span> €
+      </div>
+      <button type="submit" class="btn-book">Prenota</button>
+    </div>
+  </form>
+</div>
+
+<style>
+  .booking-col {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px #0001;
+    padding: 24px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+  }
+
+  .booking-main {
+    width: 1000;
+    flex: 0 0 1000px;
+    align-items: center;
+    justify-content: flex-start;
+
+  }
+
+  .booking-side {
+    width: 200;
+    flex: 0 0 200px;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .event-poster {
+    width: 100%;
+    max-width: 200px;
+    border-radius: 8px;
+    margin: 10px auto 18px auto;
+    box-shadow: 0 2px 8px #0002;
+    display: block;
+  }
+
+  .event-poster-placeholder {
+    width: 100%;
+    max-width: 200px;
+    height: 280px;
+    background: #eee;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin: 10px auto 18px auto;
+    font-style: italic;
+  }
+
+  .seatmap-wrapper {
+    width: 100%;
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .seatmap {
+    width: 100%;
+
+    background: #f8f8f8;
+    padding: 32px 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 6px #0001;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .seat-row {
+    margin-bottom: 7px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    white-space: normal;
+  }
+
+  .seat,
+  .seat input[type="checkbox"] {
+    vertical-align: middle;
+  }
+
+  .seat {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    margin: 2px 2px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 7px;
+    border: 1.5px solid #bbb;
+    font-weight: 500;
+    background: #e0ffe0;
+    color: #222;
+    transition: box-shadow 0.2s, background 0.2s, color 0.2s, border 0.2s;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 1px 2px #0001;
+  }
+
+  .seat input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .seat input[type="checkbox"]:checked+span,
+  .seat.selected {
+    background: #f8fc01 !important;
+    color: #000000 !important;
+    border-color: #b5d100 !important;
+  }
+
+  .seat:hover:not(.booked) {
+    box-shadow: 0 0 0 3px #e5393533;
+  }
+
+  .seat.booked {
+    background: #ffb3b3 !important;
+    color: #900 !important;
+    border-color: #e57373 !important;
+    cursor: not-allowed;
+    font-style: italic;
+  }
+
+  .legend {
+    margin: 18px 0 18px 0;
+    text-align: left;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+  }
+
+  .legend .seat {
+    margin: 0 8px 0 0;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 0.9em;
+    border-radius: 5px;
+    box-shadow: none;
+    display: inline-block;
+  }
+
+  .selected-seats-box {
+    min-height: 38px;
+    margin-bottom: 18px;
+    background: #f3f3f3;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+    width: 100%;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+    text-align: left;
+    width: 100%;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 6px 5px;
+    border-radius: 5px;
+    border: 1px solid #bbb;
+    margin-top: 8px;
+  }
+
+  .total-box {
+    margin: 18px 0 18px 0;
+    font-size: 1.1em;
+    font-weight: bold;
+    text-align: center;
+    color: #e53935;
+    width: 100%;
+  }
+
+  .btn-book {
+    width: 100%;
+    padding: 12px 0;
+    font-size: 1.1em;
+    border-radius: 6px;
+    border: none;
+    background: #e53935;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-book:hover {
+    background: #b71c1c;
+  }
+
+  .seatmap-corridor-horizontal {
+    height: 18px;
+    width: 100%;
+    display: block;
+  }
+
+  .seatmap-corridor-vertical {
+    display: inline-block;
+    width: 18px;
+    height: 1px;
+  }
+</style>
+
+<script>
+  function updateSelectedSeats() {
+    const checked = Array.from(document.querySelectorAll('input[name="seats"]:checked'));
+    const div = document.getElementById('selected-seats');
+    const totalSpan = document.getElementById('total-price');
+    const price = {{ event.price|default (0)
+  }};
+  if (checked.length === 0) {
+    div.textContent = "Nessun posto selezionato.";
+    totalSpan.textContent = "0";
+  } else {
+    div.textContent = "Posti selezionati: " + checked.map(cb => cb.value).join(', ');
+    totalSpan.textContent = (checked.length * price).toFixed(2);
+  }
+  // Aggiorna la grafica dei posti selezionati
+  document.querySelectorAll('.seat').forEach(label => {
+    label.classList.remove('selected');
+  });
+  checked.forEach(cb => {
+    cb.parentElement.classList.add('selected');
+  });
+}
+  document.addEventListener('DOMContentLoaded', updateSelectedSeats);
+</script>
+{% endblock %}

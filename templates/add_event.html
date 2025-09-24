@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 style="text-align:center; margin-bottom: 32px;">Crea un nuovo evento</h2>
+<div class="add-event-card">
+  <form method="post" enctype="multipart/form-data" autocomplete="off">
+    <div class="form-group">
+      <label for="title">Titolo evento</label>
+      <input id="title" name="title" required>
+    </div>
+    <div class="form-group">
+      <label for="date">Data</label>
+      <input id="date" name="date" type="date" required>
+    </div>
+    <div class="form-group">
+      <label for="time">Orario</label>
+      <input id="time" name="time" type="time" required>
+    </div>
+    <div class="form-group">
+      <label for="price">Prezzo (€)</label>
+      <input id="price" name="price" type="number" step="0.01" required>
+    </div>
+
+    <div class="form-group">
+      <label for="poster">Locandina (immagine)</label>
+      <input id="poster" name="poster" type="file" accept="image/*">
+    </div>
+    <div style="text-align:center; margin-top: 24px;">
+      <button type="submit" class="btn-save">Salva evento</button>
+    </div>
+</div>
+</form>
+
+
+<style>
+  .add-event-card {
+    max-width: 420px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px #0001;
+    padding: 32px 28px 24px 28px;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #444;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    font-size: 1em;
+    background: #f8f8f8;
+    transition: border 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: #e53935;
+    outline: none;
+  }
+
+  .btn-save {
+    background: #e53935;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 36px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 1px 4px #0001;
+  }
+
+  .btn-save:hover {
+    background: #b71c1c;
+  }
+</style>
+{% endblock %}

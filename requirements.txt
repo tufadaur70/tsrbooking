@@ -1,0 +1,7 @@
+Flask>=2.0
+qrcode
+Pillow
+python-dotenv
+pyjwt
+stripe
+python-barcode

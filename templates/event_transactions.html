@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 style="text-align:center; margin-bottom: 32px;">Transazioni per l'evento: {{ event_title }}</h2>
+<p style="text-align:center; margin-bottom: 24px;">
+    <a href="{{ url_for('dashboard') }}" class="btn-back">&larr; Torna alla dashboard</a>
+</p>
+
+<div class="transactions-table-wrapper">
+    <table class="transactions-table">
+        <thead>
+            <tr>
+                <th>ID Prenotazione</th>
+                <th>Data</th>
+                <th>Utente</th>
+                <th>Email</th>
+                <th>Posti</th>
+                <th>Stato</th>
+                <th>Codice Transazione</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in transactions |sort(attribute='id') %}
+            <tr>
+                <td>{{ t.id }}</td>
+                <td>{{ t.created_at }}</td>
+                <td>{{ t.name }}</td>
+                <td>{{ t.email }}</td>
+                <td>{{ t.seats }}</td>
+                <td>
+                    {% if t.status == 1 %}
+                    <span class="badge badge-pending">In attesa</span>
+                    {% elif t.status == 2 %}
+                    <span class="badge badge-paid">Pagato</span>
+                    {% elif t.status == 3 %}
+                    <span class="badge badge-validated">Validato</span>
+                    {% else %}
+                    <span class="badge badge-unknown">Sconosciuto</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ t.qrcode_token }}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" style="text-align:center; color:#888;">Nessuna transazione trovata per questo evento.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .transactions-table-wrapper {
+        overflow-x: auto;
+        margin: 0 auto;
+        max-width: 1200px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px #0001;
+        padding: 18px 8px 8px 8px;
+    }
+
+    .transactions-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 1em;
+        min-width: 900px;
+    }
+
+    .transactions-table th,
+    .transactions-table td {
+        padding: 12px 10px;
+        text-align: center;
+    }
+
+    .transactions-table th {
+        background: #23272b;
+        color: #fff;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .transactions-table tr:nth-child(even) {
+        background: #f8f8f8;
+    }
+
+    .transactions-table tr:nth-child(odd) {
+        background: #fff;
+    }
+
+    .transactions-table tr:hover {
+        background: #ffeaea;
+        transition: background 0.2s;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 5px 14px;
+        border-radius: 12px;
+        font-size: 0.98em;
+        font-weight: 500;
+        color: #fff;
+    }
+
+    .badge-pending {
+        background: #ff9800;
+    }
+
+    .badge-paid {
+        background: #388e3c;
+    }
+
+    .badge-validated {
+        background: #1976d2;
+    }
+
+    .badge-unknown {
+        background: #757575;
+    }
+
+    .btn-back {
+        background: #23272b;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 18px;
+        font-size: 1em;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.2s;
+        box-shadow: 0 1px 4px #0001;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .btn-back:hover {
+        background: #e53935;
+    }
+
+    @media (max-width: 900px) {
+        .transactions-table-wrapper {
+            padding: 8px 2px;
+            max-width: 99vw;
+        }
+
+        .transactions-table {
+            font-size: 0.97em;
+            min-width: 600px;
+        }
+    }
+</style>
+{% endblock %}

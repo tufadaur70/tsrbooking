@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="ticket-success-card">
+    <div class="ticket-header">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Teatro" class="ticket-logo">
+        <div class="ticket-title">Teatro San Raffaele</div>
+    </div>
+    <div class="success-icon">&#10004;</div>
+    <h2>Pagamento completato!</h2>
+    <div class="ticket-qrcode">
+        {% if event.poster_url %}
+        <img src="{{ event.poster_url }}" alt="Locandina evento" class="event-poster">
+        {% else %}
+        <div class="event-poster-placeholder">Nessuna locandina</div>
+        {% endif %}
+    </div>
+    <div class="ticket-info">
+        <div><b>Prenotazione #{{ booking.id }}</b></div>
+        <div>Email: {{ booking.email }}</div>
+        <div>Nominativo: {{ booking.name }}</div>
+        <div>Evento: <b>{{ event.title }}</b></div>
+        <div>Data: {{ event.date }}{% if event.time %} alle {{ event.time }}{% endif %}</div>
+        <div>Posti: {{ booking.seats }}</div>
+    </div>
+    <div class="ticket-qrcode">
+        <img src="{{ url_for('qrcode_image', token=booking.qrcode_token) }}" alt="QR Code biglietto" class="qrcode-img">
+        <div style="font-size:0.95em; color:#888; margin-top:6px;">Mostra questo QR code all'ingresso</div>
+    </div>
+    <div class="ticket-actions">
+        <button onclick="window.print()" class="btn-ticket">Scarica/Stampa biglietto</button>
+        <a href="/" class="btn-home">Torna alla home</a>
+    </div>
+    <div class="ticket-note">
+        Riceverai una email con il tuo biglietto e QR code.<br>
+        Grazie per la prenotazione!
+    </div>
+</div>
+
+<style>
+    .ticket-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-bottom: 12px;
+    }
+
+    .ticket-logo {
+        height: 48px;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px #0002;
+        background: #fff;
+    }
+
+    .ticket-title {
+        font-size: 1.35em;
+        font-weight: bold;
+        color: #e53935;
+        letter-spacing: 1px;
+        font-family: 'Roboto', Arial, sans-serif;
+    }
+
+    .ticket-success-card {
+        max-width: 420px;
+        margin: 32px auto;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 12px #0001;
+        padding: 32px 28px 24px 28px;
+        text-align: center;
+    }
+
+    .success-icon {
+        font-size: 2.8em;
+        color: #388e3c;
+        margin-bottom: 12px;
+    }
+
+    .ticket-info {
+        margin-bottom: 18px;
+        font-size: 1.08em;
+        color: #222;
+    }
+
+    .ticket-qrcode {
+        margin: 18px 0 18px 0;
+    }
+
+    .qrcode-img {
+        width: 160px;
+        height: 160px;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 1px 8px #0001;
+        background: #fff;
+    }
+
+    .qrcode-placeholder {
+        width: 160px;
+        height: 160px;
+        background: #eee;
+        color: #aaa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-style: italic;
+        margin: 0 auto;
+    }
+
+    .ticket-actions {
+        margin: 18px 0 12px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .btn-ticket {
+        background: #1976d2;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 28px;
+        font-size: 1.08em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+        box-shadow: 0 1px 4px #0001;
+    }
+
+    .btn-ticket:hover {
+        background: #0d47a1;
+    }
+
+    .btn-home {
+        background: #e53935;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 24px;
+        font-size: 1em;
+        font-weight: bold;
+        text-decoration: none;
+        transition: background 0.2s;
+        box-shadow: 0 1px 4px #0001;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .btn-home:hover {
+        background: #b71c1c;
+    }
+
+    .ticket-note {
+        margin-top: 18px;
+        font-size: 0.98em;
+        color: #555;
+    }
+
+    .event-poster {
+        max-width: 220px;
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 0 auto 18px auto;
+        box-shadow: 0 2px 8px #0002;
+        display: block;
+    }
+
+    @media print {
+        body * {
+            visibility: hidden !important;
+        }
+
+        .ticket-success-card,
+        .ticket-success-card * {
+            visibility: visible !important;
+        }
+
+        .ticket-success-card {
+            box-shadow: none !important;
+            margin: 0 !important;
+            max-width: 100vw !important;
+            padding: 0 !important;
+        }
+
+        .btn-ticket,
+        .btn-home {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}

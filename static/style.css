@@ -1,0 +1,120 @@
+body {
+    margin: 0;
+    font-family: "Josefin Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    background: #f4f6fa;
+    color: #222;
+    min-height: 100vh;
+}
+
+.navbar {
+    background: #1461ae;
+    color: #fff;
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 24px;
+    box-shadow: 0 2px 8px #0002;
+}
+
+.navbar-title {
+    font-size: 1.5em;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.navbar-links {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-links a {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 24px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.navbar-links a:hover {
+    color: #e53935;
+}
+
+.navbar-logo {
+    height: 42px;
+    margin-right: 18px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px #0002;
+    background: #fff;
+}
+
+@media (max-width: 900px) {
+    .main-content {
+        padding: 16px 4vw;
+        margin: 16px 0 0 0;
+    }
+
+    .navbar {
+        padding: 0 12px;
+    }
+
+    .navbar-logo {
+        height: 32px;
+        margin-left: 12px;
+    }
+}
+
+.main-content {
+    width: 1300px;
+    margin: 32px auto 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px #0001;
+    padding: 32px 24px;
+    min-height: 70vh;
+}
+
+.flash-message {
+    background: #c2c0d7;
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 6px;
+    margin-bottom: 18px;
+    font-weight: 500;
+    box-shadow: 0 1px 4px #0001;
+}
+
+.footer {
+    margin-top: 48px;
+    padding: 24px 0 12px 0;
+    background: #074481;
+    color: #fff;
+    font-size: 1em;
+    text-align: center;
+    letter-spacing: 0.5px;
+    border-top: 1px solid #0026ff;
+    box-shadow: 0 -2px 12px #0001;
+}
+
+.footer-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.footer-links a {
+    color: #cfc9c9;
+    text-decoration: none;
+    margin: 0 8px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: #fff;
+    text-decoration: underline;
+}

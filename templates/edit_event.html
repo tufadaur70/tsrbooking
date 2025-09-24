@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 style="text-align:center; margin-bottom: 32px;">Modifica evento</h2>
+<div class="edit-event-card">
+    <form method="post" enctype="multipart/form-data" autocomplete="off">
+        <div class="form-group">
+            <label for="title">Titolo evento</label>
+            <input id="title" name="title" value="{{ event.title }}" required>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="date">Data</label>
+                <input id="date" name="date" type="date" value="{{ event.date }}" required>
+            </div>
+            <div class="form-group">
+                <label for="time">Ora</label>
+                <input id="time" name="time" type="text" value="{{ event.time }}" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="price">Prezzo (€)</label>
+            <input id="price" name="price" type="number" step="0.01" value="{{ event.price }}" required>
+        </div>
+        <div class="form-group">
+            <label for="poster">Locandina (immagine)</label>
+            <input id="poster" name="poster" type="file" accept="image/*">
+            {% if event.poster_url %}
+            <div class="poster-preview">
+                <img src="{{ event.poster_url }}" alt="Locandina evento" class="event-poster-edit">
+            </div>
+            {% endif %}
+        </div>
+        <div style="text-align:center; margin-top: 28px;">
+            <button type="submit" class="btn-save">Salva modifiche</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .edit-event-card {
+        max-width: 440px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 12px #0001;
+        padding: 36px 32px 28px 32px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 7px;
+        color: #444;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 9px 12px;
+        border-radius: 7px;
+        border: 1px solid #bbb;
+        font-size: 1em;
+        background: #f8f8f8;
+        transition: border 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #e53935;
+        outline: none;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 18px;
+    }
+
+    .poster-preview {
+        margin-top: 12px;
+        text-align: center;
+    }
+
+    .event-poster-edit {
+        max-width: 160px;
+        max-height: 180px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px #0002;
+        margin: 0 auto;
+        display: block;
+    }
+
+    .btn-save {
+        background: #e53935;
+        color: #fff;
+        border: none;
+        border-radius: 7px;
+        padding: 13px 38px;
+        font-size: 1.13em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+        box-shadow: 0 1px 4px #0001;
+    }
+
+    .btn-save:hover {
+        background: #b71c1c;
+    }
+
+    @media (max-width: 600px) {
+        .edit-event-card {
+            padding: 18px 4vw 12px 4vw;
+        }
+
+        .form-row {
+            flex-direction: column;
+            gap: 0;
+        }
+    }
+</style>
+{% endblock %}
