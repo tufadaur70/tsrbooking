@@ -9,11 +9,16 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-config_path = os.path.join(BASE_DIR, 'config.json')
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'   
+
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(BASE_DIR, 'config.json')
+DB_PATH = os.path.join(BASE_DIR, 'data', 'cinema.db')
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'posters')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
 # ---------- CARICA FILE DI CONFIG ----------
@@ -33,15 +38,13 @@ app.config['MAIL_DEFAULT_SENDER'] = 'booking@tsrbooking.it'
 
 mail = Mail(app) # Inizializza l'oggetto Mail con l'applicazione Flask
 
-# ---------- CONFIGURAZIONE UPLOAD FILE POSTER ----------
-
-UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'posters')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
 # ---------- DATABASE ----------
 
 def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
     conn = sqlite3.connect('data/cinema.db')
     conn.row_factory = sqlite3.Row
     return conn
