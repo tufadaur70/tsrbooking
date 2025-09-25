@@ -504,5 +504,38 @@ def delete_event(event_id):
     flash('Evento eliminato con successo!')
     return redirect(url_for('dashboard'))
 
+@app.route('/resend_ticket/<int:booking_id>', methods=['POST'])
+@login_required
+def resend_ticket(booking_id):
+    conn = get_db()
+    booking = conn.execute('SELECT * FROM bookings WHERE id=?', (booking_id,)).fetchone()
+    if not booking:
+        conn.close()
+        flash('Prenotazione non trovata.', 'danger')
+        return redirect(request.referrer or url_for('dashboard'))
+    if booking['status'] not in (2, 3):
+        conn.close()
+        flash('Solo le prenotazioni pagate o validate possono ricevere il biglietto.', 'warning')
+        return redirect(request.referrer or url_for('dashboard'))
+    event = conn.execute('SELECT * FROM events WHERE id=?', (booking['event_id'],)).fetchone()
+    conn.close()
+    send_booking_email_html(booking['email'], booking['qrcode_token'], booking['seats'], booking['event_id'], booking['name'], booking['id'])
+    flash('Biglietto inviato nuovamente a ' + booking['email'], 'success')
+    return redirect(request.referrer or url_for('dashboard'))
+
+@app.route('/print_ticket/<int:booking_id>')
+@login_required
+def print_ticket(booking_id):
+    conn = get_db()
+    booking = conn.execute('SELECT * FROM bookings WHERE id=?', (booking_id,)).fetchone()
+    if not booking:
+        conn.close()
+        return 'Prenotazione non trovata', 404
+    event = conn.execute('SELECT * FROM events WHERE id=?', (booking['event_id'],)).fetchone()
+    conn.close()
+    # Genera il QR code come URL
+    qrcode_url = url_for('qrcode_image', token=booking['qrcode_token'])
+    return render_template('print_ticket.html', booking=booking, event=event, qrcode_url=qrcode_url)
+
 
 

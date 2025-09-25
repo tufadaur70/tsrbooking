@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <div class="validate-result-card">
     <div class="validate-header">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Teatro" class="validate-logo">
@@ -33,6 +34,34 @@
         box-shadow: 0 2px 12px #0001;
         padding: 36px 28px 28px 28px;
         text-align: center;
+    }
+
+    @media (max-width: 600px) {
+        .validate-result-card {
+            max-width: 99vw;
+            margin: 12vw 2vw;
+            padding: 18px 4vw 18px 4vw;
+            border-radius: 10px;
+        }
+
+        .validate-header {
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .validate-logo {
+            height: 32px;
+        }
+
+        .btn-validate-home {
+            width: 100%;
+            font-size: 1em;
+            padding: 12px 0;
+        }
+
+        .validate-input {
+            width: 98%;
+        }
     }
 
     .validate-header {

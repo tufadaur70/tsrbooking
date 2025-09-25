@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <div class="login-card">
     <h2 style="text-align:center; margin-bottom: 24px;">Login</h2>
     {% if error %}
@@ -26,6 +27,26 @@
         border-radius: 12px;
         box-shadow: 0 2px 12px #0001;
         padding: 32px 28px 24px 28px;
+    }
+
+    @media (max-width: 600px) {
+        .login-card {
+            max-width: 99vw;
+            margin: 12vw 2vw;
+            padding: 18px 4vw 18px 4vw;
+            border-radius: 10px;
+        }
+
+        .btn-login {
+            width: 100%;
+            font-size: 1em;
+            padding: 12px 0;
+        }
+
+        .form-group input {
+            font-size: 1em;
+            padding: 10px 8px;
+        }
     }
 
     .form-group {

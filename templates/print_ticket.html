@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Biglietto Prenotazione</title>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .ticket-container {
+            max-width: 480px;
+            margin: 30px auto;
+            background: #f9f9f9;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px #0001;
+            padding: 28px 18px 18px 18px;
+        }
+
+        .ticket-header {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .ticket-header img {
+            width: 120px;
+            margin-bottom: 8px;
+        }
+
+        .ticket-header h2 {
+            color: #e53935;
+            margin-bottom: 8px;
+        }
+
+        .ticket-details,
+        .ticket-extra {
+            font-size: 1.08em;
+            color: #222;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .ticket-extra {
+            font-size: 0.98em;
+            color: #444;
+            margin-bottom: 10px;
+        }
+
+        .ticket-qr {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .ticket-qr img {
+            width: 140px;
+            height: 140px;
+            border-radius: 12px;
+            box-shadow: 0 1px 8px #0001;
+        }
+
+        .ticket-footer {
+            text-align: center;
+            color: #555;
+            font-size: 0.98em;
+            margin-top: 18px;
+        }
+
+        .print-btn {
+            display: block;
+            margin: 0 auto 18px auto;
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 18px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        @media print {
+            .print-btn {
+                display: none;
+            }
+
+            .ticket-container {
+                box-shadow: none;
+                background: #fff;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ticket-container">
+        <button class="print-btn" onclick="window.print()">Stampa</button>
+        <div class="ticket-header">
+            <img src="/static/img/logo.png" alt="Logo Teatro San Raffaele">
+            <h2>Teatro San Raffaele</h2>
+            <h3>{{ event.title }}</h3>
+        </div>
+        <div class="ticket-details">
+            <b>Data:</b> {{ event.date }}<br>
+            <b>Ora:</b> {{ event.time }}<br>
+            <b>Luogo:</b> Via San Raffaele, Milano<br>
+            <b>Prezzo:</b> {{ event.price }} €<br>
+        </div>
+        <div class="ticket-details">
+            <b>Nominativo:</b> {{ booking.name }}<br>
+            <b>Email:</b> {{ booking.email }}<br>
+            <b>Posti:</b> {{ booking.seats }}<br>
+            <b>Prenotazione N°:</b> {{ booking.id }}<br>
+            <b>Codice QR:</b> {{ booking.qrcode_token }}
+        </div>
+        <div class="ticket-qr">
+            <img src="{{ qrcode_url }}" alt="QR Code biglietto">
+            <div style="font-size:0.95em;color:#888;margin-top:6px;">Mostra questo QR code all'ingresso</div>
+        </div>
+        <div class="ticket-extra">
+            <b>Stato prenotazione:</b>
+            {% if booking.status == 1 %}In attesa{% elif booking.status == 2 %}Pagato{% elif booking.status == 3
+            %}Validato{% else %}Sconosciuto{% endif %}<br>
+            <b>Data creazione:</b> {{ booking.created_at }}
+        </div>
+        <div class="ticket-footer">
+            Grazie per la prenotazione!<br>
+            <span style="font-size:0.92em;color:#aaa;">Powered by tsrbooking</span>
+        </div>
+    </div>
+</body>
+
+</html>
