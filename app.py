@@ -6,7 +6,7 @@ from flask_mail import Mail, Message
 from io import BytesIO
 from functools import wraps
 from werkzeug.utils import secure_filename
-from datetime import datetime, timedelta
+from datetime import datetime, timedeltaf
 from apscheduler.schedulers.background import BackgroundScheduler
 
 
@@ -62,8 +62,6 @@ def reset_transazioni_scadute(db_path="database.db"):
 
     # Calcolo soglia temporale (ora - 10 minuti)
     limite = datetime.now() - timedelta(minutes=5)
-    print(f"Reset transazioni scadute prima di {limite}")
-    # Aggiorno tutte le transazioni scadute
     cur.execute("""
         UPDATE bookings
         SET status = 0
