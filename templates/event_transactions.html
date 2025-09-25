@@ -16,7 +16,8 @@
                 <th>Email</th>
                 <th>Posti</th>
                 <th>Stato</th>
-                <th>Codice Transazione</th>
+                <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -39,13 +40,14 @@
                     {% endif %}
                 </td>
                 <td>
-                    {{ t.qrcode_token }}
                     {% if t.status in [2,3] %}
                     <form method="post" action="{{ url_for('resend_ticket', booking_id=t.id) }}"
                         style="display:inline;">
                         <button type="submit" class="btn-back"
                             style="margin-left:8px; font-size:0.95em; padding:4px 10px;">Invia biglietto</button>
                     </form>
+                </td>
+                <td>
                     <a href="{{ url_for('print_ticket', booking_id=t.id) }}" target="_blank" class="btn-back"
                         style="margin-left:4px; font-size:0.95em; padding:4px 10px; background:#1976d2;">Stampa
                         biglietto</a>
