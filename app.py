@@ -45,10 +45,6 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-    conn = sqlite3.connect('data/cinema.db')
-    conn.row_factory = sqlite3.Row
-    return conn
-
 # ---------- FUNZIONI  ----------
 @app.context_processor
 def inject_now():
@@ -80,7 +76,7 @@ def allowed_file(filename):
 
 def genera_qrcode(token):
     # Crea l'URL di validazione con il token
-    url = f"http://127.0.0.1:5000/validate_qrcode?token={token}"
+    url = f"https://booking.tfnmusic.it/validate_qrcode?token={token}"
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
     qr.add_data(url)
     qr.make(fit=True)
