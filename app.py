@@ -6,7 +6,7 @@ from flask_mail import Mail, Message
 from io import BytesIO
 from functools import wraps
 from werkzeug.utils import secure_filename
-from datetime import datetime, timedeltaf
+from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 
 
