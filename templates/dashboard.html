@@ -18,7 +18,6 @@
         <th></th>
         <th></th>
         <th></th>
-        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -30,9 +29,6 @@
         <td>{{ e.validated }}</td>
         <td>
           <a href="{{ url_for('event_transactions', event_id=e.id) }}" class="btn-table">Transazioni</a>
-        </td>
-        <td>
-          <a href="{{ url_for('event_seatmap', event_id=e.id) }}" class="btn-table">Piantina</a>
         </td>
         <td class="dashboard-actions">
           <a href="{{ url_for('edit_event', event_id=e.id) }}" class="btn-table btn-edit">Modifica</a>

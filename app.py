@@ -2,7 +2,7 @@ import os, sqlite3, io, json, secrets
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import qrcode
 import stripe
-from flaflask_mailman import Mail, Message
+from flask_mail import Mail, Message
 from io import BytesIO
 from functools import wraps
 from werkzeug.utils import secure_filename
@@ -22,12 +22,12 @@ with open('config.json') as f:
 stripe.api_key = CONFIG['stripe']['secret_key']
 
 # ---------- FLASK MAIL CONFIGURAZIONE----------
-app.config['MAIL_SERVER'] = 'smtp.tim.it'
+app.config['MAIL_SERVER'] = 'smtp.ionos.it'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True  # Abilita StartTLS
-app.config['MAIL_USERNAME'] = 'a.tufanari@tim.it'
-app.config['MAIL_PASSWORD'] = 'caWdyw-qurqo4-zorbex'
-app.config['MAIL_DEFAULT_SENDER'] = 'a.tufanari@tim.it'
+app.config['MAIL_USERNAME'] = 'booking@tsrbooking.it'
+app.config['MAIL_PASSWORD'] = 'hafpec-xecMuh-woqxe7'
+app.config['MAIL_DEFAULT_SENDER'] = 'booking@tsrbooking.it'
 
 mail = Mail(app) # Inizializza l'oggetto Mail con l'applicazione Flask
 
@@ -97,12 +97,10 @@ def send_booking_email_html(to_email, token, seats, event_id , name, booking_id 
     event_title = event['title']
     event_date = event['date']
     event_time = event['time']
-    poster_url = event['poster_url'] or '/static/img/default_poster.png'  # Immagine di default se manca
-    logo_url = '/static/img/logo.png'  # Percorso del logo del teatro
-
+    
     msg = Message(
         subject=f'PRENOTAZIONE CONFERMATA {event_title}',
-        sender='a.tufanari@tim.it',
+        sender='booking@tsrbooking.it',
         recipients=[to_email]
     )
 
@@ -367,23 +365,24 @@ def createcheckoutsession():
     event = conn.execute('SELECT * FROM events WHERE id=?', (booking['event_id'],)).fetchone()
     conn.close()
 
-    seats = booking['seats']
-    email = booking['email']
+      # Prepara i dati del prodotto con immagine se disponibile
+    product_data = {
+        'name': f"{event['title']} : {event['date']}:  {event['time']}",
+        'description': f"Posti: {booking['seats']}",
+        'images': [request.url_root.rstrip('/') + event['poster_url']] if event['poster_url'] else [],
+    }
 
-    # Stripe Checkout
     session_stripe = stripe.checkout.Session.create(
         payment_method_types=['card'],
         mode='payment',
-        customer_email=email,
+        customer_email=booking['email'],
         line_items=[{
             'price_data': {
                 'currency': 'eur',
                 'unit_amount': int(event['price'] * 100),
-                'product_data': {
-                    'name': f"{event['title']} ({seats})"
-                }
+                'product_data': product_data
             },
-            'quantity': len(seats.split(','))
+            'quantity': len(booking['seats'].split(','))
         }],
         metadata={
             'booking_id': booking_id 
@@ -453,42 +452,6 @@ def event_transactions(event_id):
         'event_transactions.html',
         event_title=event['title'] if event else 'Evento sconosciuto',
         transactions=transactions
-    )
-
-@app.route('/event/<int:event_id>/seatmap')
-@login_required
-def event_seatmap(event_id):
-    conn = get_db()
-    event = conn.execute('SELECT * FROM events WHERE id=?', (event_id,)).fetchone()
-   
-    rows = 18
-    cols = 27
-    unavailable = set(CONFIG['unavailable_seats'])
-    row_letters = CONFIG['row_letters']
-    if not event:
-        flash("Evento non trovato.")
-        return redirect(url_for('dashboard'))
-    # Recupera i posti venduti per l'evento
-    bookings = conn.execute('SELECT seats FROM bookings WHERE event_id=? AND status = 2', (event_id,)).fetchall()
-    validation = conn.execute('SELECT seats FROM bookings WHERE event_id=? AND status = 3', (event_id,)).fetchall()
-    print(validation)
-    
-    sold_seats = set()  
-    for b in bookings:
-        sold_seats.update(b['seats'].split(','))
-    validati = set()
-    for v in validation:
-        validati.update(v['seats'].split(','))
-    conn.close()
-      
-    return render_template(
-        'event_seatmap.html',
-        event_title=event['title'],
-        row_letters=row_letters,
-        cols=cols,
-        sold_seats=sold_seats,
-        validation=validati,
-        unavailable=unavailable
     )
 
 @app.route('/event/<int:event_id>/edit', methods=['GET', 'POST'])
