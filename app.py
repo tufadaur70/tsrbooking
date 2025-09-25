@@ -368,7 +368,7 @@ def createcheckoutsession():
     product_data = {
         'name': f"{event['title']} : {event['date']}:  {event['time']}",
         'description': f"Posti: {booking['seats']}",
-        'images': [request.url_root.rstrip('/') + event['poster_url']] if event['poster_url'] else [],
+        
     }
 
     session_stripe = stripe.checkout.Session.create(
