@@ -9,13 +9,15 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(BASE_DIR, 'config.json')
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'   
 
 
 # ---------- CARICA FILE DI CONFIG ----------
-with open('config.json') as f:
+with open(config_path) as f:
     CONFIG = json.load(f)
 
 # ---------- STRIPE CONFIGURAZIONE ----------
@@ -505,6 +507,5 @@ def delete_event(event_id):
     flash('Evento eliminato con successo!')
     return redirect(url_for('dashboard'))
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
 
