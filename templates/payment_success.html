@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <div class="ticket-success-card">
     <div class="ticket-header">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Teatro" class="ticket-logo">
         <div class="ticket-title">Teatro San Raffaele</div>
     </div>
-    <div class="success-icon">&#10004;</div>
-    <h2>Pagamento completato!</h2>
+    <h2>{{ event.title }}</h2>
+    <h3>{{ event.date }} alle {{ event.time }}</h3>
     <div class="ticket-qrcode">
         {% if event.poster_url %}
         <img src="{{ event.poster_url }}" alt="Locandina evento" class="event-poster">
@@ -15,24 +16,20 @@
         {% endif %}
     </div>
     <div class="ticket-info">
-        <div><b>Prenotazione #{{ booking.id }}</b></div>
+        <div><b>Ticket N: {{ booking.id }}</b></div></br>
         <div>Email: {{ booking.email }}</div>
-        <div>Nominativo: {{ booking.name }}</div>
-        <div>Evento: <b>{{ event.title }}</b></div>
-        <div>Data: {{ event.date }}{% if event.time %} alle {{ event.time }}{% endif %}</div>
-        <div>Posti: {{ booking.seats }}</div>
-    </div>
-    <div class="ticket-qrcode">
-        <img src="{{ url_for('qrcode_image', token=booking.qrcode_token) }}" alt="QR Code biglietto" class="qrcode-img">
-        <div style="font-size:0.95em; color:#888; margin-top:6px;">Mostra questo QR code all'ingresso</div>
+        <div>Nominativo: {{ booking.name }}</div></br>
+        <div>
+            <h3>Posti:{{ booking.seats }}</h3>
+        </div>
     </div>
     <div class="ticket-actions">
         <button onclick="window.print()" class="btn-ticket">Scarica/Stampa biglietto</button>
         <a href="/" class="btn-home">Torna alla home</a>
     </div>
     <div class="ticket-note">
-        Riceverai una email con il tuo biglietto e QR code.<br>
-        Grazie per la prenotazione!
+        Riceverai una email con il tuo biglietto<br>
+        Grazie per l'acquisto!
     </div>
 </div>
 
@@ -168,6 +165,35 @@
         display: block;
     }
 
+    @media (max-width: 600px) {
+        .ticket-success-card {
+            max-width: 99vw;
+            margin: 4vw 1vw;
+            padding: 10vw 2vw 8vw 2vw;
+            border-radius: 10px;
+        }
+
+        .ticket-header {
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ticket-logo {
+            height: 36px;
+        }
+
+        .btn-ticket,
+        .btn-home {
+            width: 100%;
+            font-size: 1em;
+            padding: 12px 0;
+        }
+
+        .event-poster {
+            max-width: 98vw;
+        }
+    }
+
     @media print {
         body * {
             visibility: hidden !important;
@@ -180,14 +206,22 @@
 
         .ticket-success-card {
             box-shadow: none !important;
-            margin: 0 !important;
-            max-width: 100vw !important;
+            margin: 0 auto !important;
+            max-width: 340px !important;
+            min-height: 0 !important;
             padding: 0 !important;
+            border-radius: 0 !important;
+            page-break-after: always;
         }
 
         .btn-ticket,
         .btn-home {
             display: none !important;
+        }
+
+        html,
+        body {
+            background: #fff !important;
         }
     }
 </style>

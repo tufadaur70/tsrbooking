@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<h2 style="text-align:center; margin-bottom: 24px;">Prenota posti per l'evento: {{ event.title }}</h2>
+<div>
+    <form method="post" id="admin-seats-form" style="display: flex; width: 100%;">
+        <!-- Colonna 1: Piantina -->
+        <div class="booking-col booking-main">
+            <h2 style="text-align:center; margin-bottom: 12px;">PALCOSCENICO</h2>
+            <div class="seatmap-wrapper">
+                <div class="seatmap">
+                    {% for row_letter in row_letters %}
+                    {% if loop.index0 == 7 %}
+                    <div class="seatmap-corridor-horizontal"></div>
+                    {% endif %}
+                    <div class="seat-row">
+                        {% for col in range(1, cols+1)|reverse %}
+                        {% if col == 14 %}
+                        <span class="seatmap-corridor-vertical"></span>
+                        {% endif %}
+                        {% set seat = row_letter ~ col %}
+                        {% if seat in unavailable %}
+                        <!-- Non mostrare il posto -->
+                        {% elif seat in booked_seats %}
+                        <span class="seat booked" title="{{ seat }}"></span>
+                        {% else %}
+                        <label class="seat" title="{{ seat }}">
+                            <input type="checkbox" name="seats" value="{{ seat }}" onchange="updateSelectedSeats()">
+                        </label>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <!-- Colonna 2: Info evento, stato, legenda, form -->
+        <div class="booking-col booking-side">
+            <h2 style="text-align:center;">{{ event.title }}</h2>
+            <div style="color:#555; margin-bottom:10px; text-align:center;">Data: {{ event.date }}</div>
+            <div style="color:#555; margin-bottom:10px; text-align:center;">Orario: {{ event.time }}</div>
+            {% if event.poster_url %}
+            <img src="{{ event.poster_url }}" alt="Locandina evento" class="event-poster">
+            {% else %}
+            <div class="event-poster-placeholder">Nessuna locandina</div>
+            {% endif %}
+            <div id="selected-seats" class="selected-seats-box">
+                Nessun posto selezionato.
+            </div>
+            <div class="form-group">
+                <label for="name"><b>Nome cliente:</b></label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email"><b>Email (opzionale):</b></label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="total-box">
+                Totale: <span id="total-price">0</span> €
+            </div>
+            <button type="submit" class="btn-book">Registra pagamento in cassa</button>
+        </div>
+    </form>
+</div>
+<script>
+    function updateSelectedSeats() {
+        const checked = Array.from(document.querySelectorAll('input[name="seats"]:checked'));
+        const div = document.getElementById('selected-seats');
+        const totalSpan = document.getElementById('total-price');
+        const price = {{ event.price|default (0) | tojson
+    }};
+    if (checked.length === 0) {
+        div.textContent = "Nessun posto selezionato.";
+        totalSpan.textContent = "0";
+    } else {
+        div.textContent = "Posti selezionati: " + checked.map(cb => cb.value).join(', ');
+        totalSpan.textContent = (checked.length * price).toFixed(2);
+    }
+    document.querySelectorAll('.seat').forEach(label => {
+        label.classList.remove('selected');
+    });
+    checked.forEach(cb => {
+        cb.parentElement.classList.add('selected');
+    });
+  }
+    document.addEventListener('DOMContentLoaded', updateSelectedSeats);
+</script>
+{% endblock %}

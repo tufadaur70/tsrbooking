@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS bookings (
     email TEXT NOT NULL,
     seats TEXT NOT NULL,          -- posti separati da , 
     status REAL DEFAULT 0 , -- 0=libero, 1=pending ,2 = acquistato , 3 = validato
-    qrcode_token TEXT NOT NULL,
     created_at TEXT NOT NULL,
     FOREIGN KEY(event_id) REFERENCES events(id)
 )

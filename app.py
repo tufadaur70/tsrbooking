@@ -1,13 +1,12 @@
 import os, sqlite3, io, json, secrets
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-import qrcode
 import stripe
-from flask_mail import Mail, Message
-from io import BytesIO
 from functools import wraps
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
+import smtplib
+from email.message import EmailMessage
 
 
 app = Flask(__name__)
@@ -17,6 +16,7 @@ app.secret_key = 'supersecretkey'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 config_path = os.path.join(BASE_DIR, 'config.json')
 DB_PATH = os.path.join(BASE_DIR, 'data', 'cinema.db')
+IMG_PATH = os.path.join(BASE_DIR, 'static', 'img')
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'posters')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
@@ -28,15 +28,6 @@ with open(config_path) as f:
 # ---------- STRIPE CONFIGURAZIONE ----------
 stripe.api_key = CONFIG['stripe']['secret_key']
 
-# ---------- FLASK MAIL CONFIGURAZIONE----------
-app.config['MAIL_SERVER'] = 'smtp.ionos.it'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True  # Abilita StartTLS
-app.config['MAIL_USERNAME'] = 'booking@tsrbooking.it'
-app.config['MAIL_PASSWORD'] = 'hafpec-xecMuh-woqxe7'
-app.config['MAIL_DEFAULT_SENDER'] = 'booking@tsrbooking.it'
-
-mail = Mail(app) # Inizializza l'oggetto Mail con l'applicazione Flask
 
 # ---------- DATABASE ----------
 
@@ -74,72 +65,77 @@ scheduler.start()
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def genera_qrcode(token):
-    # Crea l'URL di validazione con il token
-    url = f"https://booking.tfnmusic.it/validate_qrcode?token={token}"
-    qr = qrcode.QRCode(version=1, box_size=10, border=5)
-    qr.add_data(url)
-    qr.make(fit=True)
-    img = qr.make_image(fill='black', back_color='white')
-    byte_io = io.BytesIO()
-    img.save(byte_io, 'PNG')
-    byte_io.seek(0)
-    return byte_io
 
-
-def send_booking_email_html(to_email, token, seats, event_id , name, booking_id ):
-    qr_mio = genera_qrcode(token)
-    
+def send_booking_email_html(booking_id):
     conn = get_db()
-    event = conn.execute('SELECT * FROM events WHERE id=?', (event_id,)).fetchone()
+    booking = conn.execute('SELECT * FROM bookings WHERE id=?', (booking_id,)).fetchone()
+    event = conn.execute('SELECT * FROM events WHERE id=?', (booking['event_id'],)).fetchone()
     conn.close()
     event_title = event['title']
     event_date = event['date']
     event_time = event['time']
-    
-    msg = Message(
-        subject=f'PRENOTAZIONE CONFERMATA {event_title}',
-        sender='booking@tsrbooking.it',
-        recipients=[to_email]
-    )
+    seats = booking['seats']
+    to_email = booking['email']
+    name = booking['name']
 
-    msg.html = f"""
-    <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 2px 12px #0001;padding:24px 18px 18px 18px;font-family:'Roboto',Arial,sans-serif;">
-      <div style="text-align:center;margin-bottom:18px;">
-        <h2 style="text-align:center;color:#e53935;margin-bottom:18px;">Teatro San Raffaele</h2>
-     
-      </div>
-      <h2 style="text-align:center;color:#e53935;margin-bottom:18px;">Prenotazione confermata!</h2>
-      <div style="text-align:center;margin-bottom:18px;">
+    subject = f'ACQUISTO CONFERMATO {event_title}'
+    sender = 'booking@tsrbooking.it'
+    password = 'hafpec-xecMuh-woqxe7'
+    smtp_server = 'smtp.ionos.it'
+    smtp_port = 587
+
+        # Percorsi immagini
+
+
+    logo_url = 'https://booking.tfnmusic.it/static/img/logo.png'
+    poster_url = ''
+    if event['poster_url']:
+        if event['poster_url'].startswith('http'):
+            poster_url = event['poster_url']
+        else:
+            poster_url = f"https://booking.tfnmusic.it{event['poster_url']}"
+    poster_img_html = f"<img src='{poster_url}' alt='Locandina evento' style='max-width:220px;border-radius:8px;box-shadow:0 1px 6px #0002;margin:0 auto 10px auto;display:block;'>" if poster_url else ''
+
+    html = f"""
+        <div style='max-width:480px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 2px 12px #0001;padding:24px 18px 18px 18px;font-family:Roboto,Arial,sans-serif;'>
+            <div style='text-align:center;margin-bottom:18px;'>
+                <img src='{logo_url}' alt='Teatro San Raffaele' style='max-width:180px;margin-bottom:10px;'><br>
+                <h2 style='text-align:center;color:#e53935;margin-bottom:18px;'>Teatro San Raffaele</h2>
+            </div>
+            <h2 style='text-align:center;color:#e53935;margin-bottom:18px;'>Acquisto Confermato</h2>
+            <div style='text-align:center;margin-bottom:18px;'>
+                {poster_img_html}
+            </div>
+            <div style='font-size:1.08em;color:#222;margin-bottom:18px;text-align:center;'>
+                <h2>{event_title}</h2>
+                <h3>Data: {event_date} &nbsp;|&nbsp; Ora: {event_time}</h3><br>
+                Nominativo: <b>{name}</b>
+                Email: <b>{to_email}</b><br>
+                <h2>Posti: <b>{seats}</b></h2><br>
+                Ticket N: : <b>{booking_id}</b>
+            </div>
+            <div style='text-align:center;color:#555;font-size:0.98em;margin-top:18px;'>
+                <br>
+                Grazie per l'acquisto!
+            </div>
         </div>
-      <div style="font-size:1.08em;color:#222;margin-bottom:18px;text-align:center;">
-        <b>{event_title}</b><br>
-        Data: {event_date} &nbsp;|&nbsp; Ora: {event_time}<br>
-        Nominativo: <b>{name}</b><br>
-        Posti: <b>{seats}</br>
-        Prenotazione Numero: <b>{booking_id}</b>
-      </div>
-      <div style="text-align:center;margin-bottom:18px;">
-        <img src="cid:qrcode_image" alt="QR Code biglietto" style="width:140px;height:140px;border-radius:12px;box-shadow:0 1px 8px #0001;">
-        <div style="font-size:0.95em;color:#888;margin-top:6px;">Mostra questo QR code all'ingresso</div>
-      </div>
-      <div style="text-align:center;color:#555;font-size:0.98em;margin-top:18px;">
-        <br>
-        Grazie per la prenotazione!
-      </div>
-    </div>
-    """
+        """
 
-    msg.body = "Prenotazione confermata. In allegato il QR code."
-    msg.attach(
-        filename="qrcode.png",
-        content_type="image/png",
-        data=qr_mio.read(),
-        disposition='inline',
-        headers={'Content-ID': '<qrcode_image>'}
-    )
-    mail.send(msg)
-    return "Message sent!"
+    msg = EmailMessage()
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = to_email
+    msg.set_content("Conferma di acquisto")
+    msg.add_alternative(html, subtype='html')
+
+    try:
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(sender, password)
+            server.send_message(msg)
+        return "Message sent!"
+    except Exception as e:
+        return f"Errore invio email: {e}"
     
 def login_required(f):
     @wraps(f)
@@ -207,6 +203,18 @@ def add_event():
     # Passa il dizionario delle sale al template
     return render_template('add_event.html')
 
+def check_seats_available(event_id, seats_to_check):
+    """Restituisce True se tutti i posti sono ancora disponibili per l'evento, False se almeno uno è già prenotato."""
+    conn = get_db()
+    bookings = conn.execute(
+        'SELECT seats FROM bookings WHERE event_id=? AND status IN (1,2,3)', (event_id,)
+    ).fetchall()
+    conn.close()
+    booked_seats = set()
+    for b in bookings:
+        booked_seats.update(b['seats'].split(','))
+    return all(seat not in booked_seats for seat in seats_to_check)
+
 @app.route('/select_seats/<int:event_id>', methods=['GET', 'POST'])
 def select_seats(event_id):
     conn = get_db()
@@ -215,7 +223,6 @@ def select_seats(event_id):
         flash("Evento non trovato.")
         return redirect(url_for('dashboard'))
 
-    rows = 18
     cols = 27
     unavailable = set(CONFIG['unavailable_seats'])
     row_letters = CONFIG['row_letters']
@@ -240,7 +247,7 @@ def select_seats(event_id):
                 booked_seats=booked_seats,
                 unavailable=unavailable
             )
-        # Verifica che i posti selezionati siano ancora disponibili
+        # Verifica che i posti selezionati siano ancora disponibili (prima verifica veloce)
         if any(seat in booked_seats or seat in unavailable for seat in selected_seats):
             flash('Alcuni posti selezionati non sono più disponibili.')
             return render_template(
@@ -254,6 +261,8 @@ def select_seats(event_id):
         # Raccogli dati utente (qui esempio semplice, puoi aggiungere un form per nome/email)
         name = request.form.get('name')
         email = request.form.get('email')
+        import re
+        email_regex = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
         if not name or not email:
             flash('Inserisci nome ed email!')
             return render_template(
@@ -264,13 +273,33 @@ def select_seats(event_id):
                 booked_seats=booked_seats,
                 unavailable=unavailable
             )
+        if not re.match(email_regex, email):
+            flash('Inserisci un indirizzo email valido!')
+            return render_template(
+                'select_seats.html',
+                event=event,
+                row_letters=row_letters,
+                cols=cols,
+                booked_seats=booked_seats,
+                unavailable=unavailable
+            )
         seats_str = ','.join(selected_seats)
+        # --- VERIFICA CONCORRENZA: controllo finale prima di inserire la prenotazione ---
+        if not check_seats_available(event_id, selected_seats):
+            flash('Alcuni posti sono appena stati prenotati da un altro utente. Riprova!')
+            return render_template(
+                'select_seats.html',
+                event=event,
+                row_letters=row_letters,
+                cols=cols,
+                booked_seats=booked_seats,
+                unavailable=unavailable
+            )
         now = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
-        # Inserisci la prenotazione (status 1 = in attesa)
-        qrcode_token = secrets.token_urlsafe(16)  # genera token univoco
+        
         conn.execute(
-            'INSERT INTO bookings (event_id, name, email, seats, status, qrcode_token , created_at) VALUES (?, ?, ?, ?, ?, ?,?)',
-            (event_id, name, email, seats_str, 1,qrcode_token , now)
+            'INSERT INTO bookings (event_id, name, email, seats, status, created_at) VALUES (?, ?, ?, ?, ?,?)',
+            (event_id, name, email, seats_str, 1, now)
         )
         conn.commit()
         booking_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
@@ -328,33 +357,6 @@ def dashboard():
     conn.close()
     return render_template('dashboard.html', events=event_list)
 
-@app.route('/validate_qrcode')
-@login_required
-def validate_qrcode():
-    result = None
-    token = str(request.args['token'])
-        # Usa la stessa logica della API
-    conn = get_db()
-    booking = conn.execute(
-            "SELECT * FROM bookings WHERE qrcode_token=?",
-            (token,)
-        ).fetchone()
-    if not booking:
-            result = {"success": False, "error": "Prenotazione non trovata"}
-    elif booking['status'] == 1:
-            result = {"success": False, "error": "Transazione non pagata"}
-    elif booking['status'] == 3:
-            result = {"success": False, "error": "Transazione già validata"}
-    else:
-            conn.execute(
-                "UPDATE bookings SET status=3 WHERE id=?",
-                (booking['id'],)
-            )
-            conn.commit()
-            result = {"success": True, "message": "Prenotazione validata"}
-    conn.close()
-    return render_template('validate_qrcode_result.html', result=result)
-
 @app.route('/createcheckoutsession', methods=['GET'])
 def createcheckoutsession():
     booking_id = int(request.args['booking_id'])
@@ -411,10 +413,9 @@ def payment_success():
         conn.commit()
         conn.close()
 
-        # invia la mail con il QR code
-        send_booking_email_html(booking['email'],  booking['qrcode_token'],booking['seats'], booking['event_id'], booking['name'],booking['id'])
-        
-        
+        # invia la mail 
+        send_booking_email_html(booking['id'])
+      
     else:
         flash("Prenotazione non trovata o già pagata", "danger")
 
@@ -489,9 +490,6 @@ def edit_event(event_id):
     return render_template('edit_event.html', event=event)
 
 @app.route('/qrcode/<token>')
-def qrcode_image(token):
-    img_io = genera_qrcode(token)
-    return app.response_class(img_io, mimetype='image/png')
 
 @app.route('/event/<int:event_id>/delete', methods=['POST'])
 @login_required
@@ -517,10 +515,10 @@ def resend_ticket(booking_id):
         conn.close()
         flash('Solo le prenotazioni pagate o validate possono ricevere il biglietto.', 'warning')
         return redirect(request.referrer or url_for('dashboard'))
-    event = conn.execute('SELECT * FROM events WHERE id=?', (booking['event_id'],)).fetchone()
     conn.close()
-    send_booking_email_html(booking['email'], booking['qrcode_token'], booking['seats'], booking['event_id'], booking['name'], booking['id'])
+    send_booking_email_html(booking_id)
     flash('Biglietto inviato nuovamente a ' + booking['email'], 'success')
+    
     return redirect(request.referrer or url_for('dashboard'))
 
 @app.route('/print_ticket/<int:booking_id>')
@@ -533,9 +531,102 @@ def print_ticket(booking_id):
         return 'Prenotazione non trovata', 404
     event = conn.execute('SELECT * FROM events WHERE id=?', (booking['event_id'],)).fetchone()
     conn.close()
-    # Genera il QR code come URL
-    qrcode_url = url_for('qrcode_image', token=booking['qrcode_token'])
-    return render_template('print_ticket.html', booking=booking, event=event, qrcode_url=qrcode_url)
+  
+    return render_template('print_ticket.html', booking=booking, event=event)
+
+@app.route('/event/<int:event_id>/admin_book_seats', methods=['GET', 'POST'])
+@login_required
+def admin_book_seats(event_id):
+    conn = get_db()
+    event = conn.execute('SELECT * FROM events WHERE id=?', (event_id,)).fetchone()
+    if not event:
+        conn.close()
+        flash("Evento non trovato.")
+        return redirect(url_for('dashboard'))
+
+    cols = 27
+    unavailable = set(CONFIG['unavailable_seats'])
+    row_letters = CONFIG['row_letters']
+    bookings = conn.execute(
+        'SELECT seats FROM bookings WHERE event_id=? AND status IN (1,2,3)', (event_id,)
+    ).fetchall()
+    booked_seats = set()
+    for b in bookings:
+        booked_seats.update(b['seats'].split(','))
+
+    if request.method == 'POST':
+        selected_seats = request.form.getlist('seats')
+        if not selected_seats:
+            flash('Seleziona almeno un posto!')
+            return render_template(
+                'admin_book_seats.html',
+                event=event,
+                row_letters=row_letters,
+                cols=cols,
+                booked_seats=booked_seats,
+                unavailable=unavailable
+            )
+        if any(seat in booked_seats or seat in unavailable for seat in selected_seats):
+            flash('Alcuni posti selezionati non sono più disponibili.')
+            return render_template(
+                'admin_book_seats.html',
+                event=event,
+                row_letters=row_letters,
+                cols=cols,
+                booked_seats=booked_seats,
+                unavailable=unavailable
+            )
+        name = request.form.get('name')
+        email = request.form.get('email')
+        if not name:
+            flash('Inserisci il nome del cliente!')
+            return render_template(
+                'admin_book_seats.html',
+                event=event,
+                row_letters=row_letters,
+                cols=cols,
+                booked_seats=booked_seats,
+                unavailable=unavailable
+            )
+        seats_str = ','.join(selected_seats)
+        # Verifica concorrenza
+        if not check_seats_available(event_id, selected_seats):
+            flash('Alcuni posti sono appena stati prenotati da un altro utente. Riprova!')
+            return render_template(
+                'admin_book_seats.html',
+                event=event,
+                row_letters=row_letters,
+                cols=cols,
+                booked_seats=booked_seats,
+                unavailable=unavailable
+            )
+        now = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+        # Status 2 = pagato
+        conn.execute(
+            'INSERT INTO bookings (event_id, name, email, seats, status, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+            (event_id, name, email, seats_str, 2, now)
+        )
+        conn.commit()
+        booking_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+        conn.close()
+        flash('Prenotazione registrata con successo!')
+        return redirect(url_for('print_ticket', booking_id=booking_id))
+
+    conn.close()
+    return render_template(
+        'admin_book_seats.html',
+        event=event,
+        row_letters=row_letters,
+        cols=cols,
+        booked_seats=booked_seats,
+        unavailable=unavailable
+    )
+
+def run():
+    app.run(debug=True)
+
+if __name__ == '__main__':
+    run()
 
 
 

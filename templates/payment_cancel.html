@@ -1,52 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <div class="payment-cancel-card">
     <div class="cancel-icon">&#10060;</div>
     <h2>Pagamento annullato</h2>
     <p class="cancel-message">Non è stato effettuato alcun addebito.<br>Puoi riprovare o tornare alla home.</p>
     <a href="/" class="btn-cancel-home">Torna alla home</a>
 </div>
-
-<style>
-    .payment-cancel-card {
-        max-width: 400px;
-        margin: 48px auto;
-        background: #fff;
-        border-radius: 14px;
-        box-shadow: 0 2px 12px #0001;
-        padding: 32px 28px 24px 28px;
-        text-align: center;
-    }
-
-    .cancel-icon {
-        font-size: 2.8em;
-        color: #e53935;
-        margin-bottom: 12px;
-    }
-
-    .cancel-message {
-        font-size: 1.08em;
-        color: #555;
-        margin-bottom: 18px;
-    }
-
-    .btn-cancel-home {
-        background: #23272b;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        padding: 12px 32px;
-        font-size: 1.08em;
-        font-weight: bold;
-        text-decoration: none;
-        transition: background 0.2s;
-        box-shadow: 0 1px 4px #0001;
-        cursor: pointer;
-        display: inline-block;
-    }
-
-    .btn-cancel-home:hover {
-        background: #e53935;
-    }
-</style>
 {% endblock %}

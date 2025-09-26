@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <h2 style="text-align:center; margin-bottom: 32px;">Dashboard Eventi</h2>
 
 <div style="text-align:right; margin-bottom: 18px;">
@@ -15,6 +16,7 @@
         <th>Data</th>
         <th>Posti Venduti</th>
         <th>Posti Validati</th>
+        <th></th>
         <th></th>
         <th></th>
         <th></th>
@@ -38,6 +40,11 @@
             onsubmit="return confirm('Sei sicuro di voler eliminare questo evento?');">
             <button type="submit" class="btn-table btn-delete">Elimina</button>
           </form>
+
+        </td>
+        <td>
+          <a href="{{ url_for('admin_book_seats', event_id=e.id) }}" class="btn-table"
+            style="background:#d2bd19;color:#000000;margin-top:6px;display:block;">Cassa</a>
         </td>
       </tr>
       {% else %}
@@ -48,118 +55,4 @@
     </tbody>
   </table>
 </div>
-
-<style>
-  .dashboard-table-wrapper {
-
-    margin: 0 auto;
-    width: 1200px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px #0001;
-    padding: 18px 8px 8px 8px;
-  }
-
-  .dashboard-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 1em;
-    min-width: 800px;
-  }
-
-  .dashboard-table th,
-  .dashboard-table td {
-    padding: 12px 10px;
-    text-align: center;
-  }
-
-  .dashboard-table th {
-    background: #1d5185;
-    color: #fff;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-
-  .dashboard-table tr:nth-child(even) {
-    background: #f8f8f8;
-  }
-
-  .dashboard-table tr:nth-child(odd) {
-    background: #fff;
-  }
-
-  .dashboard-table tr:hover {
-    background: #ffeaea;
-    transition: background 0.2s;
-  }
-
-  .btn-table {
-    background: #e5c535;
-    color: #060606;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 18px;
-    font-size: 0.98em;
-    font-weight: 500;
-    text-decoration: none;
-    transition: background 0.2s;
-    box-shadow: 0 1px 4px #0001;
-    cursor: pointer;
-    display: inline-block;
-  }
-
-  .btn-table:hover {
-    background: #b71c1c;
-  }
-
-  .btn-new-event {
-    background: #388e3c;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 22px;
-    font-size: 1.05em;
-    font-weight: bold;
-    text-decoration: none;
-    transition: background 0.2s;
-    box-shadow: 0 1px 4px #0001;
-    cursor: pointer;
-    display: inline-block;
-  }
-
-  .btn-new-event:hover {
-    background: #256029;
-  }
-
-  .dashboard-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .dashboard-actions .btn-table {
-    margin: 0 !important;
-    min-width: 90px;
-    text-align: center;
-  }
-
-  .dashboard-actions form {
-    margin: 0;
-    display: inline;
-  }
-
-  @media (max-width: 900px) {
-    .dashboard-table-wrapper {
-      padding: 8px 2px;
-      max-width: 99vw;
-    }
-
-    .dashboard-table {
-      font-size: 0.97em;
-      min-width: 600px;
-    }
-  }
-</style>
 {% endblock %}

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <h1 style="text-align:center; margin-bottom:32px;">Eventi in programma</h1>
 <div class="event-cards">
   {% for event in events |sort(attribute='id', reverse=false) %}
@@ -22,115 +23,4 @@
   <div style="text-align:center; width:100%;">Nessun evento disponibile.</div>
   {% endfor %}
 </div>
-
-<style>
-  .event-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 32px;
-    justify-content: center;
-  }
-
-  .event-card {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px #0001;
-    width: 270px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: box-shadow 0.2s, transform 0.2s;
-    overflow: hidden;
-  }
-
-  .event-card:hover {
-    box-shadow: 0 4px 24px #0002;
-    transform: translateY(-4px) scale(1.03);
-  }
-
-  .event-card-img {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    background: #eee;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-  }
-
-  .event-card-img-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #aaa;
-    font-style: italic;
-    font-size: 1.1em;
-  }
-
-  .event-card-body {
-    padding: 18px 16px 20px 16px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .event-card-title {
-    font-size: 1.2em;
-    font-weight: 700;
-    margin: 0 0 8px 0;
-    text-align: center;
-  }
-
-  .event-card-date {
-    font-size: 1.4em;
-    color: #b00000;
-    margin-bottom: 6px;
-    text-align: center;
-  }
-
-  .event-card-price {
-    font-size: 1.1em;
-    color: #555;
-    margin-bottom: 6px;
-    text-align: center;
-  }
-
-  .event-card-time {
-    font-size: 1.2em;
-    color: #ab0101;
-    margin-bottom: 6px;
-    text-align: center;
-  }
-
-  .event-card-btn {
-    margin-top: 12px;
-    padding: 10px 28px;
-    background: #e1c703;
-    color: #000000;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    text-decoration: none;
-    font-size: 1em;
-    transition: background 0.2s;
-    box-shadow: 0 1px 4px #0001;
-    cursor: pointer;
-    display: inline-block;
-  }
-
-  .event-card-btn:hover {
-    background: #fff459;
-  }
-
-  @media (max-width: 900px) {
-    .event-cards {
-      gap: 18px;
-    }
-
-    .event-card {
-      width: 98vw;
-      max-width: 340px;
-    }
-  }
-</style>
 {% endblock %}
