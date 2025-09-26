@@ -369,7 +369,7 @@ def createcheckoutsession():
       # Prepara i dati del prodotto con immagine se disponibile
     product_data = {
         'name': f"{event['title']} : {event['date']}:  {event['time']}",
-        'description': f"Posti: {booking['seats']}",
+        'description': f"Posti: {booking['seats']} TICKET N: {booking_id}",
         
     }
 
