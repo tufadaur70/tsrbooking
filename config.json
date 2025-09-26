@@ -4,8 +4,8 @@
   "stripe": {
     "secret_key": "sk_test_51SB9Y7EIB3tuSdca9JWw0tfPubZVG0oM2w4dwI6MYaykEa9nN8hqvs8xeV10dy7Ep8LQAQWVQaWJyts7zahwRSIE00nnx0XCeR",
     "publishable_key": "pk_test_51SB9Y7EIB3tuSdcaHq6XJQosRlhtleNKOa6ZxySpsEIh0tg7yQSMjBJObVvZ50ZXvp9A4HQNEFaAzJgDGAYDecY200xeeVncIM",
-    "success_url": "http://127.0.0.1:5000/payment/success?session_id={CHECKOUT_SESSION_ID}",
-    "cancel_url": "http://127.0.0.1:5000/payment/cancel"
+    "success_url": "https://booking.tfnmusic.it/payment/success?session_id={CHECKOUT_SESSION_ID}",
+    "cancel_url": "https://booking.tfnmusic.it/payment/cancel"
   },
   "row_letters": [
     "A1-",
