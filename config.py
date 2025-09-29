@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 env_path = '/var/www/tsrbooking/.env'
 load_dotenv(env_path)
 
+
 # Percorsi
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(BASE_DIR, 'config.json')
@@ -32,6 +33,15 @@ STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
 STRIPE_SUCCESS_URL = os.getenv('STRIPE_SUCCESS_URL')
 STRIPE_CANCEL_URL = os.getenv('STRIPE_CANCEL_URL')
+print(f"STRIPE_SUCCESS_URL: {STRIPE_SUCCESS_URL}")
+print(f"STRIPE_CANCEL_URL: {STRIPE_CANCEL_URL}")
+print(f"STRIPE_SECRET_KEY: {STRIPE_SECRET_KEY}")
+print(f"STRIPE_PUBLISHABLE_KEY: {STRIPE_PUBLISHABLE_KEY}")
+
+
+
+
+
 
 # Configurazioni Email da variabili d'ambiente
 EMAIL_SENDER = 'booking@tsrbooking.it'
