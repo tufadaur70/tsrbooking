@@ -44,8 +44,3 @@ UNAVAILABLE_SEATS = set(CONFIG['unavailable_seats'])
 ROW_LETTERS = CONFIG['row_letters']
 COLS = 27
 
-# Validazione configurazioni critiche
-if not STRIPE_SECRET_KEY:
-    raise ValueError("STRIPE_SECRET_KEY deve essere definita nelle variabili d'ambiente")
-if not EMAIL_PASSWORD:
-    raise ValueError("EMAIL_PASSWORD deve essere definita nelle variabili d'ambiente")
