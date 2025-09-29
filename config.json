@@ -1,12 +1,4 @@
 {
-  "admin_password": "tuffy1",
-  "admin_user": "admin",
-  "stripe": {
-    "secret_key": "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",
-    "publishable_key": "pk_live_51SB9XzCvEoTAFgb6FTlHrmUeyrGsk4XDBAClR6lSUyPPWiKVsBzrVEhUL8MV6BK3IxfM8opJJHHcYzOzdVjYqpiA007pFNZbgA",
-    "success_url": "https://booking.tfnmusic.it/payment/success?session_id={CHECKOUT_SESSION_ID}",
-    "cancel_url": "https://booking.tfnmusic.it/payment/cancel"
-  },
   "row_letters": [
     "A1-",
     "A",

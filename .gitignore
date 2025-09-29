@@ -1,0 +1,40 @@
+# File con dati sensibili
+.env
+
+# Database
+data/cinema.db
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Upload files (opzionale)
+static/posters/*.png
+static/posters/*.jpg
+static/posters/*.jpeg
+static/posters/*.gif
+
+# Backup files
+*_old.py
+*.backup
