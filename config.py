@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 # Carica variabili d'ambiente dal file .env
 # Per production, usa un path assoluto sicuro come /etc/tsrbooking/.env
-env_path = os.getenv('ENV_FILE_PATH', '.env')
+env_path = '/var/www/tsrbooking/.env'
 load_dotenv(env_path)
 
 # Percorsi
