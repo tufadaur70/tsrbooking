@@ -30,8 +30,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'change-this-secret-key')
 # Configurazioni Stripe da variabili d'ambiente
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
-STRIPE_SUCCESS_URL = os.getenv('STRIPE_SUCCESS_URL', 'http://localhost:5000/payment/success?session_id={CHECKOUT_SESSION_ID}')
-STRIPE_CANCEL_URL = os.getenv('STRIPE_CANCEL_URL', 'http://localhost:5000/payment/cancel')
+STRIPE_SUCCESS_URL = os.getenv('STRIPE_SUCCESS_URL')
+STRIPE_CANCEL_URL = os.getenv('STRIPE_CANCEL_URL')
 
 # Configurazioni Email da variabili d'ambiente
 EMAIL_SENDER = 'booking@tsrbooking.it'
