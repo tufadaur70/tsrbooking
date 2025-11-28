@@ -72,63 +72,50 @@ def generate_email_ticket_pdf(booking, event):
     # Stili
     styles = getSampleStyleSheet()
     
-    # Stili eleganti per biglietto teatrale
+    # Stili eleganti per biglietto teatrale - senza cornici
     title_style = ParagraphStyle(
         'TicketTitle',
         parent=styles['Title'],
-        fontSize=24,
-        textColor=colors.HexColor('#8B4513'),
-        alignment=TA_CENTER,
-        spaceAfter=12,
-        fontName='Helvetica-Bold',
-        backColor=colors.HexColor('#FFF8DC'),
-        borderColor=colors.HexColor('#8B4513'),
-        borderWidth=2,
-        borderPadding=8
-    )
-    
-    # Stile per l'evento con sfondo dorato
-    event_style = ParagraphStyle(
-        'EventTitle',
-        parent=styles['Heading1'],
-        fontSize=20,
-        textColor=colors.HexColor('#2d3748'),
+        fontSize=28,
+        textColor=colors.HexColor('#2B4C8C'),  # Blu elegante
         alignment=TA_CENTER,
         spaceAfter=15,
         fontName='Helvetica-Bold',
-        backColor=colors.HexColor('#FFD700'),
-        borderColor=colors.HexColor('#B8860B'),
-        borderWidth=1,
+        backColor=colors.HexColor('#F8F9FA'),  # Grigio molto chiaro
+        borderWidth=0,  # Nessuna cornice
         borderPadding=10
     )
     
-    # Stile per dettagli eleganti
+    # Stile per l'evento elegante - senza cornice
+    event_style = ParagraphStyle(
+        'EventTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#8B0000'),  # Rosso scuro teatrale
+        alignment=TA_CENTER,
+        spaceAfter=18,
+        fontName='Helvetica-Bold',
+        backColor=colors.HexColor('#F0F0F0'),  # Grigio chiaro
+        borderWidth=0,  # Nessuna cornice
+        borderPadding=12
+    )
+    
+    # Stile per dettagli eleganti - più grandi e senza cornici
     detail_style = ParagraphStyle(
         'TicketDetails',
         parent=styles['Normal'],
-        fontSize=12,
+        fontSize=16,  # Aumentato da 12 a 16
         textColor=colors.HexColor('#2d3748'),
         alignment=TA_CENTER,
-        spaceAfter=8,
-        fontName='Helvetica',
-        backColor=colors.HexColor('#F8F9FA'),
-        borderColor=colors.HexColor('#E2E8F0'),
-        borderWidth=1,
-        borderPadding=6
+        spaceAfter=12,
+        fontName='Helvetica-Bold',
+        backColor=colors.HexColor('#FFFFFF'),  # Bianco pulito
+        borderWidth=0,  # Nessuna cornice
+        borderPadding=10
     )
     
     # Lista elementi del documento
     story = []
-    
-    # Bordo decorativo superiore
-    border_style = ParagraphStyle(
-        'Border',
-        alignment=TA_CENTER,
-        fontSize=16,
-        textColor=colors.HexColor('#8B4513'),
-        spaceAfter=15
-    )
-    story.append(Paragraph("★ • • • ★ • • • ★ • • • TEATRO SAN RAFFAELE • • • ★ • • • ★ • • • ★", border_style))
     
     # Header con logo se esiste
     try:
@@ -209,34 +196,32 @@ def generate_email_ticket_pdf(booking, event):
                         break
                         
             if not poster_added:
-                # Fallback: placeholder testuale
+                # Fallback: placeholder testuale pulito
                 placeholder_style = ParagraphStyle(
                     'PlaceholderStyle',
                     parent=styles['Normal'],
-                    fontSize=14,
-                    textColor=colors.HexColor('#8B4513'),
+                    fontSize=16,
+                    textColor=colors.HexColor('#2B4C8C'),
                     alignment=TA_CENTER,
-                    backColor=colors.HexColor('#F5F5DC'),
-                    borderColor=colors.HexColor('#8B4513'),
-                    borderWidth=1,
-                    borderPadding=20
+                    backColor=colors.HexColor('#F8F9FA'),
+                    borderWidth=0,  # Nessuna cornice
+                    borderPadding=25
                 )
                 story.append(Paragraph("🎭<br/>POSTER<br/>NON DISPONIBILE", placeholder_style))
                 story.append(Spacer(1, 0.1*inch))
                 
         except Exception as e:
             print(f"Errore caricamento poster: {e}")
-            # Aggiungi placeholder in caso di errore
+            # Aggiungi placeholder pulito in caso di errore
             placeholder_style = ParagraphStyle(
                 'PlaceholderStyle',
                 parent=styles['Normal'],
-                fontSize=14,
-                textColor=colors.HexColor('#8B4513'),
+                fontSize=16,
+                textColor=colors.HexColor('#8B0000'),
                 alignment=TA_CENTER,
-                backColor=colors.HexColor('#F5F5DC'),
-                borderColor=colors.HexColor('#8B4513'),
-                borderWidth=1,
-                borderPadding=20
+                backColor=colors.HexColor('#F8F9FA'),
+                borderWidth=0,  # Nessuna cornice
+                borderPadding=25
             )
             story.append(Paragraph("🎭<br/>ERRORE CARICAMENTO<br/>POSTER", placeholder_style))
             story.append(Spacer(1, 0.1*inch))
@@ -256,60 +241,56 @@ def generate_email_ticket_pdf(booking, event):
         ['🎟️ Codice Biglietto', f"#{booking['id']:05d}"]
     ]
     
-    # Crea tabella elegante stile biglietto teatrale
-    table = Table(data, colWidths=[2.2*inch, 3.2*inch])
+    # Crea tabella pulita senza cornici
+    table = Table(data, colWidths=[2.5*inch, 3.5*inch])
     table.setStyle(TableStyle([
         ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 11),
+        ('FONTSIZE', (0, 0), (-1, -1), 14),  # Aumentato da 11 a 14
         ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),  # Prima colonna
-        ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#8B4513')),
-        ('TEXTCOLOR', (1, 0), (1, -1), colors.HexColor('#2d3748')),
+        ('FONTNAME', (1, 0), (1, -1), 'Helvetica-Bold'),  # Anche i valori in bold
+        ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#2B4C8C')),  # Blu elegante
+        ('TEXTCOLOR', (1, 0), (1, -1), colors.HexColor('#8B0000')),  # Rosso teatrale
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('GRID', (0, 0), (-1, -1), 2, colors.HexColor('#8B4513')),
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#FFF8DC')),  # Sfondo crema per etichette
-        ('BACKGROUND', (1, 0), (1, -1), colors.HexColor('#FFFAF0')),  # Sfondo bianco sporco per valori
-        ('ROWBACKGROUNDS', (1, 0), (1, -1), [colors.HexColor('#FFFAF0'), colors.HexColor('#F5F5DC')]),
-        ('PADDING', (0, 0), (-1, -1), 8),
-        ('ROUNDEDCORNERS', (0, 0), (-1, -1), [3, 3, 3, 3]),
+        # Nessuna griglia/cornice
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#F8F9FA')),  # Grigio chiaro per etichette
+        ('BACKGROUND', (1, 0), (1, -1), colors.HexColor('#FFFFFF')),  # Bianco per valori
+        ('ROWBACKGROUNDS', (1, 0), (1, -1), [colors.HexColor('#FFFFFF'), colors.HexColor('#F0F0F0')]),
+        ('PADDING', (0, 0), (-1, -1), 12),  # Aumentato padding
+        ('LINEBELOW', (0, 0), (-1, -2), 1, colors.HexColor('#E0E0E0')),  # Solo linee sottili tra righe
     ]))
     
     story.append(table)
     story.append(Spacer(1, 0.2*inch))
     
-    # Box istruzioni elegante
+    # Box istruzioni pulito - senza cornici
     important_style = ParagraphStyle(
         'ImportantBox',
         parent=styles['Normal'],
-        fontSize=11,
-        textColor=colors.HexColor('#8B4513'),
+        fontSize=14,  # Più grande
+        textColor=colors.HexColor('#8B0000'),
         alignment=TA_CENTER,
         fontName='Helvetica-Bold',
-        backColor=colors.HexColor('#FFF8DC'),
-        borderColor=colors.HexColor('#8B4513'),
-        borderWidth=2,
-        borderPadding=8
+        backColor=colors.HexColor('#F8F9FA'),  # Grigio chiaro
+        borderWidth=0,  # Nessuna cornice
+        borderPadding=12
     )
     
     story.append(Paragraph("⚠️ ISTRUZIONI IMPORTANTI ⚠️<br/>Presentare questo biglietto all'ingresso • Arrivare 20 minuti prima", important_style))
     story.append(Spacer(1, 0.15*inch))
     
-    # Bordo decorativo inferiore
-    story.append(Paragraph("✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦", border_style))
-    story.append(Spacer(1, 0.1*inch))
-    
-    # Footer elegante
+    # Footer elegante - senza giallo
     footer_style = ParagraphStyle(
         'FooterElegant',
         parent=styles['Normal'],
-        fontSize=9,
-        textColor=colors.HexColor('#8B4513'),
+        fontSize=11,  # Più grande
+        textColor=colors.HexColor('#2B4C8C'),
         alignment=TA_CENTER,
         fontName='Helvetica-Oblique',
-        backColor=colors.HexColor('#F5F5DC'),
-        borderColor=colors.HexColor('#8B4513'),
+        backColor=colors.HexColor('#F8F9FA'),  # Grigio chiaro
+        borderColor=colors.HexColor('#2B4C8C'),
         borderWidth=1,
-        borderPadding=5
+        borderPadding=8
     )
     
     story.append(Paragraph("🏛️ TEATRO SAN RAFFAELE 🏛️<br/>📧 info@teatrosanraffaele.it", footer_style))
