@@ -38,86 +38,117 @@ def generate_email_ticket_pdf(booking, event):
     
     buffer = io.BytesIO()
     
-    # Crea documento PDF in formato biglietto
+    # Crea documento PDF in formato biglietto elegante
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
-        rightMargin=0.3*inch,
-        leftMargin=0.3*inch,
-        topMargin=0.3*inch,
-        bottomMargin=0.3*inch
+        rightMargin=0.4*inch,
+        leftMargin=0.4*inch,
+        topMargin=0.4*inch,
+        bottomMargin=0.4*inch
     )
     
     # Stili
     styles = getSampleStyleSheet()
     
-    # Stile personalizzato per il titolo
+    # Stili eleganti per biglietto teatrale
     title_style = ParagraphStyle(
-        'CustomTitle',
+        'TicketTitle',
         parent=styles['Title'],
-        fontSize=22,
+        fontSize=24,
+        textColor=colors.HexColor('#8B4513'),
+        alignment=TA_CENTER,
+        spaceAfter=12,
+        fontName='Helvetica-Bold',
+        backColor=colors.HexColor('#FFF8DC'),
+        borderColor=colors.HexColor('#8B4513'),
+        borderWidth=2,
+        borderPadding=8
+    )
+    
+    # Stile per l'evento con sfondo dorato
+    event_style = ParagraphStyle(
+        'EventTitle',
+        parent=styles['Heading1'],
+        fontSize=20,
+        textColor=colors.HexColor('#2d3748'),
+        alignment=TA_CENTER,
+        spaceAfter=15,
+        fontName='Helvetica-Bold',
+        backColor=colors.HexColor('#FFD700'),
+        borderColor=colors.HexColor('#B8860B'),
+        borderWidth=1,
+        borderPadding=10
+    )
+    
+    # Stile per dettagli eleganti
+    detail_style = ParagraphStyle(
+        'TicketDetails',
+        parent=styles['Normal'],
+        fontSize=12,
         textColor=colors.HexColor('#2d3748'),
         alignment=TA_CENTER,
         spaceAfter=8,
-        fontName='Helvetica-Bold'
-    )
-    
-    # Stile per l'evento
-    event_style = ParagraphStyle(
-        'EventStyle',
-        parent=styles['Heading2'],
-        fontSize=16,
-        textColor=colors.HexColor('#744210'),
-        alignment=TA_CENTER,
-        spaceAfter=10,
-        fontName='Helvetica-Bold'
+        fontName='Helvetica',
+        backColor=colors.HexColor('#F8F9FA'),
+        borderColor=colors.HexColor('#E2E8F0'),
+        borderWidth=1,
+        borderPadding=6
     )
     
     # Lista elementi del documento
     story = []
     
+    # Bordo decorativo superiore
+    border_style = ParagraphStyle(
+        'Border',
+        alignment=TA_CENTER,
+        fontSize=16,
+        textColor=colors.HexColor('#8B4513'),
+        spaceAfter=15
+    )
+    story.append(Paragraph("★ • • • ★ • • • ★ • • • TEATRO SAN RAFFAELE • • • ★ • • • ★ • • • ★", border_style))
+    
     # Header con logo se esiste
     try:
         if os.path.exists('static/img/logo.png'):
-            logo = Image('static/img/logo.png', width=1*inch, height=1*inch)
+            logo = Image('static/img/logo.png', width=1.2*inch, height=1.2*inch)
             logo.hAlign = 'CENTER'
             story.append(logo)
             story.append(Spacer(1, 0.1*inch))
     except:
         pass
     
-    # Header con titolo teatro
-    story.append(Paragraph("🎭 TEATRO SAN RAFFAELE", title_style))
-    story.append(Paragraph("<b>BIGLIETTO D'INGRESSO</b>", event_style))
-    story.append(Spacer(1, 0.1*inch))
-    
-    # Titolo evento in evidenza
-    story.append(Paragraph(f"<b>{event['title']}</b>", event_style))
+    # Titolo principale del teatro
+    story.append(Paragraph("🎭 BIGLIETTO D'INGRESSO 🎭", title_style))
     story.append(Spacer(1, 0.15*inch))
     
-    # Poster dell'evento se esiste
+    # Titolo evento in evidenza con bordo dorato
+    story.append(Paragraph(f"<b>🎪 {event['title']} 🎪</b>", event_style))
+    story.append(Spacer(1, 0.15*inch))
+    
+    # Poster dell'evento (più piccolo ma elegante)
     if event['poster_url']:
         try:
-            # Tenta di caricare il poster
+            poster_added = False
             if event['poster_url'].startswith('http'):
-                # URL esterno
                 response = requests.get(event['poster_url'], timeout=5)
                 if response.status_code == 200:
                     img_buffer = io.BytesIO(response.content)
-                    poster = Image(img_buffer, width=1.5*inch, height=2*inch)
+                    poster = Image(img_buffer, width=1.8*inch, height=2.2*inch)
                     poster.hAlign = 'CENTER'
                     story.append(poster)
                     story.append(Spacer(1, 0.1*inch))
+                    poster_added = True
             else:
-                # File locale
                 poster_path = event['poster_url'].lstrip('/')
                 if os.path.exists(poster_path):
-                    poster = Image(poster_path, width=1.5*inch, height=2*inch)
+                    poster = Image(poster_path, width=1.8*inch, height=2.2*inch)
                     poster.hAlign = 'CENTER'
                     story.append(poster)
                     story.append(Spacer(1, 0.1*inch))
+                    poster_added = True
         except:
-            # Se il poster non è caricabile, continua senza
             pass
     
     # Tabella con dettagli biglietto
@@ -135,204 +166,71 @@ def generate_email_ticket_pdf(booking, event):
         ['🎟️ Codice Biglietto', f"#{booking['id']:05d}"]
     ]
     
-    # Crea tabella con stile compatto
-    table = Table(data, colWidths=[2*inch, 3*inch])
+    # Crea tabella elegante stile biglietto teatrale
+    table = Table(data, colWidths=[2.2*inch, 3.2*inch])
     table.setStyle(TableStyle([
         ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('FONTSIZE', (0, 0), (-1, -1), 11),
         ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),  # Prima colonna
-        ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#744210')),
+        ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#8B4513')),
         ('TEXTCOLOR', (1, 0), (1, -1), colors.HexColor('#2d3748')),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f7fafc')),
-        ('PADDING', (0, 0), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 2, colors.HexColor('#8B4513')),
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#FFF8DC')),  # Sfondo crema per etichette
+        ('BACKGROUND', (1, 0), (1, -1), colors.HexColor('#FFFAF0')),  # Sfondo bianco sporco per valori
+        ('ROWBACKGROUNDS', (1, 0), (1, -1), [colors.HexColor('#FFFAF0'), colors.HexColor('#F5F5DC')]),
+        ('PADDING', (0, 0), (-1, -1), 8),
+        ('ROUNDEDCORNERS', (0, 0), (-1, -1), [3, 3, 3, 3]),
     ]))
     
     story.append(table)
-    story.append(Spacer(1, 0.15*inch))
-    
-    # Note importanti compatte
-    important_style = ParagraphStyle(
-        'ImportantStyle',
-        parent=styles['Normal'],
-        fontSize=10,
-        textColor=colors.HexColor('#744210'),
-        alignment=TA_CENTER,
-        fontName='Helvetica-Bold'
-    )
-    
-    story.append(Paragraph("⚠️ Presentare questo biglietto all'ingresso • Arrivare 20 min prima", important_style))
-    story.append(Spacer(1, 0.1*inch))
-    
-    # Footer compatto
-    footer_style = ParagraphStyle(
-        'FooterStyle',
-        parent=styles['Normal'],
-        fontSize=8,
-        textColor=colors.HexColor('#718096'),
-        alignment=TA_CENTER,
-        fontName='Helvetica'
-    )
-    
-    story.append(Paragraph("📍 Teatro San Raffaele • 📧 info@teatrosanraffaele.it", footer_style))
-    story.append(Paragraph(f"Generato: {datetime.now().strftime('%d/%m/%Y %H:%M')}", footer_style))
-    
-    # Genera il PDF
-    doc.build(story)
-    
-    buffer.seek(0)
-    return buffer.getvalue()
-
-def generate_ticket_pdf(booking, event):
-    """
-    Genera un PDF del biglietto per una prenotazione
-    
-    Args:
-        booking: Dict con i dati della prenotazione
-        event: Dict con i dati dell'evento
-    
-    Returns:
-        BytesIO: Buffer contenente il PDF generato
-    """
-    
-    buffer = io.BytesIO()
-    
-    # Crea documento PDF in formato biglietto (landscape A4)
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=landscape(A4),
-        rightMargin=0.5*inch,
-        leftMargin=0.5*inch,
-        topMargin=0.5*inch,
-        bottomMargin=0.5*inch
-    )
-    
-    # Stili
-    styles = getSampleStyleSheet()
-    
-    # Stile personalizzato per il titolo
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Title'],
-        fontSize=24,
-        textColor=colors.HexColor('#2d3748'),
-        alignment=TA_CENTER,
-        spaceAfter=20,
-        fontName='Helvetica-Bold'
-    )
-    
-    # Stile per l'evento
-    event_style = ParagraphStyle(
-        'EventStyle',
-        parent=styles['Heading2'],
-        fontSize=18,
-        textColor=colors.HexColor('#744210'),
-        alignment=TA_CENTER,
-        spaceAfter=15,
-        fontName='Helvetica-Bold'
-    )
-    
-    # Stile per i dettagli
-    detail_style = ParagraphStyle(
-        'DetailStyle',
-        parent=styles['Normal'],
-        fontSize=12,
-        textColor=colors.HexColor('#2d3748'),
-        alignment=TA_LEFT,
-        fontName='Helvetica'
-    )
-    
-    # Stile per info importanti
-    important_style = ParagraphStyle(
-        'ImportantStyle',
-        parent=styles['Normal'],
-        fontSize=14,
-        textColor=colors.HexColor('#744210'),
-        alignment=TA_CENTER,
-        fontName='Helvetica-Bold'
-    )
-    
-    # Lista elementi del documento
-    story = []
-    
-    # Header con titolo teatro
-    story.append(Paragraph("🎭 TEATRO SAN RAFFAELE", title_style))
     story.append(Spacer(1, 0.2*inch))
     
-    # Titolo evento
-    story.append(Paragraph(f"<b>{event['title']}</b>", event_style))
-    story.append(Spacer(1, 0.3*inch))
-    
-    # Tabella con dettagli biglietto
-    seats_count = len(booking['seats'].split(','))
-    total_price = event['price'] * seats_count
-    
-    # Dati per la tabella
-    data = [
-        ['👤 Intestatario:', booking['name']],
-        ['📧 Email:', booking['email']],
-        ['📅 Data Spettacolo:', event['date']],
-        ['⏰ Orario:', event['time']],
-        ['🎫 Posti:', booking['seats']],
-        ['💰 Prezzo Totale:', f"€ {total_price:.2f}"],
-        ['🎟️ ID Prenotazione:', f"#{booking['id']}"]
-    ]
-    
-    # Crea tabella
-    table = Table(data, colWidths=[3*inch, 4*inch])
-    table.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 12),
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),  # Prima colonna in grassetto
-        ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#744210')),  # Prima colonna colorata
-        ('TEXTCOLOR', (1, 0), (1, -1), colors.HexColor('#2d3748')),  # Seconda colonna
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f7fafc')),  # Sfondo prima colonna
-        ('ROWBACKGROUNDS', (1, 0), (1, -1), [colors.white, colors.HexColor('#fafafa')]),
-        ('PADDING', (0, 0), (-1, -1), 10),
-    ]))
-    
-    story.append(table)
-    story.append(Spacer(1, 0.4*inch))
-    
-    # Istruzioni importanti
-    story.append(Paragraph("📋 ISTRUZIONI IMPORTANTI", important_style))
-    story.append(Spacer(1, 0.1*inch))
-    
-    instructions = [
-        "• Presentare questo biglietto all'ingresso del teatro",
-        "• Arrivare almeno 15 minuti prima dell'orario di spettacolo",
-        "• I posti sono numerati e riservati",
-        "• Non è consentito fumare all'interno del teatro",
-        "• Spegnere i cellulari durante lo spettacolo"
-    ]
-    
-    for instruction in instructions:
-        story.append(Paragraph(instruction, detail_style))
-    
-    story.append(Spacer(1, 0.3*inch))
-    
-    # Footer con info teatro
-    footer_style = ParagraphStyle(
-        'FooterStyle',
+    # Box istruzioni elegante
+    important_style = ParagraphStyle(
+        'ImportantBox',
         parent=styles['Normal'],
-        fontSize=10,
-        textColor=colors.HexColor('#718096'),
+        fontSize=11,
+        textColor=colors.HexColor('#8B4513'),
         alignment=TA_CENTER,
-        fontName='Helvetica'
+        fontName='Helvetica-Bold',
+        backColor=colors.HexColor('#FFF8DC'),
+        borderColor=colors.HexColor('#8B4513'),
+        borderWidth=2,
+        borderPadding=8
     )
     
+    story.append(Paragraph("⚠️ ISTRUZIONI IMPORTANTI ⚠️<br/>Presentare questo biglietto all'ingresso • Arrivare 20 minuti prima", important_style))
+    story.append(Spacer(1, 0.15*inch))
     
-    story.append(Paragraph(f"Biglietto generato il {datetime.now().strftime('%d/%m/%Y alle %H:%M')}", footer_style))
+    # Bordo decorativo inferiore
+    story.append(Paragraph("✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦", border_style))
+    story.append(Spacer(1, 0.1*inch))
+    
+    # Footer elegante
+    footer_style = ParagraphStyle(
+        'FooterElegant',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=colors.HexColor('#8B4513'),
+        alignment=TA_CENTER,
+        fontName='Helvetica-Oblique',
+        backColor=colors.HexColor('#F5F5DC'),
+        borderColor=colors.HexColor('#8B4513'),
+        borderWidth=1,
+        borderPadding=5
+    )
+    
+    story.append(Paragraph("🏛️ TEATRO SAN RAFFAELE 🏛️<br/>📧 info@teatrosanraffaele.it", footer_style))
+    story.append(Spacer(1, 0.05*inch))
+    story.append(Paragraph(f"Biglietto generato il {datetime.now().strftime('%d/%m/%Y alle %H:%M')}", 
+                          ParagraphStyle('FooterDate', parent=styles['Normal'], fontSize=8, 
+                                       textColor=colors.HexColor('#718096'), alignment=TA_CENTER)))
     
     # Genera il PDF
     doc.build(story)
     
-    # Ritorna il buffer
     buffer.seek(0)
     return buffer.getvalue()
 

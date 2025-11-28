@@ -11,10 +11,10 @@ from functools import wraps
 # Import moduli locali
 from config import *
 from database import *
-from email_service import send_booking_email_html, send_booking_confirmation_with_pdf
+from email_service import  send_booking_confirmation_with_pdf
 from auth import login_required, check_admin_credentials
 from booking_service import *
-from pdf_generator import generate_ticket_pdf, generate_tickets_summary_pdf
+from pdf_generator import generate_email_ticket_pdf, generate_tickets_summary_pdf
 
 # Configurazione logging
 logging.basicConfig(
@@ -401,7 +401,7 @@ def payment_success():
     
     if booking and booking['status'] == 1:
         update_booking_status(booking_id, 2)  # Status 2 = pagato
-        send_booking_email_html(booking_id)
+        send_booking_confirmation_with_pdf(booking_id)
     else:
         flash("Prenotazione non trovata o già pagata", "danger")
 
@@ -490,7 +490,7 @@ def generate_ticket_pdf_route(booking_id):
             return redirect(url_for('dashboard'))
         
         # Genera PDF
-        pdf_data = generate_ticket_pdf(booking, event)
+        pdf_data = generate_email_ticket_pdf(booking, event)
         
         # Prepara nome file
         filename = f"biglietto_{event['title'].replace(' ', '_')}_{booking['id']}.pdf"
