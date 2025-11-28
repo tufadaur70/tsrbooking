@@ -130,7 +130,7 @@ def get_event_stats(event_id):
     # Posti pagati (venduti)
     sold = conn.execute(
         'SELECT SUM(LENGTH(seats) - LENGTH(REPLACE(seats, ",", "")) + 1) AS sold_count '
-        'FROM bookings WHERE event_id=? AND status IN (2, 3)', (event_id,)
+        'FROM bookings WHERE event_id=? AND status =2', (event_id,)
     ).fetchone()['sold_count'] or 0
 
     # Posti validati
