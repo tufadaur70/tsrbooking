@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime, timedelta
 from config import DB_PATH
-
+#peppe
 def get_db():
     """Ottieni connessione al database"""
     conn = sqlite3.connect(DB_PATH)
