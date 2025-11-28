@@ -187,9 +187,9 @@
             <b>Ticket N°:</b> {{ booking.id }}<br>
         </div>
         <div class="ticket-extra">
-            <b>Stato prenotazione:</b>
+            <b>Stato:</b>
             {% if booking.status == 1 %}In attesa{% elif booking.status == 2 %}Pagato{% elif booking.status == 3
-            %}Validato{% else %}Sconosciuto{% endif %}<br>
+            %}Cassa{% else %}Sconosciuto{% endif %}<br>
             <b>Data creazione:</b> {{ booking.created_at }}
         </div>
         <div class="ticket-footer">

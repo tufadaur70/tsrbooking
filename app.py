@@ -248,9 +248,9 @@ def admin_book_seats(event_id):
                 unavailable=UNAVAILABLE_SEATS
             )
         
-        # Crea prenotazione con status 2 (pagato)
+        # Crea prenotazione con status 3 (cassa)
         seats_str = ','.join(selected_seats)
-        booking_id = create_booking(event_id, name, email, seats_str, status=2)
+        booking_id = create_booking(event_id, name, email, seats_str, status=3)
         flash('Prenotazione registrata con successo!')
         return redirect(url_for('print_ticket', booking_id=booking_id))
 

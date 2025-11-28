@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+ {% extends 'base.html' %}
 
 {% block content %}
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +16,7 @@
       <div class="event-card-date">{{ event.date }}</div>
       <div class="event-card-time">{{ event.time }}</div>
       <div class="event-card-price">Posto Unico: {{ event.price }} €</div>
-      <a href="{{ url_for('select_seats', event_id=event.id) }}" class="event-card-btn">Prenota</a>
+      <a href="{{ url_for('select_seats', event_id=event.id) }}" class="event-card-btn">Scegli i Posti</a>
     </div>
   </div>
   {% else %}
