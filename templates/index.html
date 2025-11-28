@@ -13,7 +13,9 @@
   {% for event in events |sort(attribute='id', reverse=false) %}
   <div class="event-card">
     {% if event.poster_url %}
-    <img src="{{ event.poster_url }}" alt="Locandina {{ event.title }}" class="event-card-img">
+    <div class="event-card-img-container">
+      <img src="{{ event.poster_url }}" alt="Locandina {{ event.title }}" class="event-card-img">
+    </div>
     {% else %}
     <div class="event-card-img event-card-img-placeholder">Nessuna locandina</div>
     {% endif %}
