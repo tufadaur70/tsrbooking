@@ -2,18 +2,18 @@
 
 {% block content %}
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<h2 style="text-align:center; margin-bottom: 32px;">Transazioni per l'evento: {{ event_title }}</h2>
-<p style="text-align:center; margin-bottom: 24px;">
-    <a href="{{ url_for('dashboard') }}" class="btn-back">&larr; Torna alla dashboard</a>
+<h2 class="text-center mb-5">Transazioni per l'evento: {{ event_title }}</h2>
+<p class="text-center mb-4">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-dark">&larr; Torna alla dashboard</a>
 </p>
 
-<div class="transactions-table-wrapper">
-    <table class="transactions-table">
+<div class="table-wrapper">
+    <table class="table">
         <thead>
             <tr>
-                <th>ID Prenotazione</th>
+                <th>Id</th>
                 <th>Data</th>
-                <th>Utente</th>
+                <th>Nome</th>
                 <th>Email</th>
                 <th>Posti</th>
                 <th>Stato</th>
@@ -43,26 +43,21 @@
                 </td>
                 <td>
                     {% if t.status in [2,3] %}
-                    <form method="post" action="{{ url_for('resend_ticket', booking_id=t.id) }}"
-                        style="display:inline;">
-                        <button type="submit" class="btn-back"
-                            style="margin-left:8px; font-size:0.95em; padding:4px 10px;">Invia biglietto</button>
+                    <form method="post" action="{{ url_for('resend_ticket', booking_id=t.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-info btn-sm">Invia biglietto</button>
                     </form>
                     {% endif %}
                 </td>
                 <td>
                     {% if t.status in [2,3] %}
-                    <a href="{{ url_for('print_ticket', booking_id=t.id) }}" target="_blank" class="btn-back"
-                        style="margin-left:4px; font-size:0.95em; padding:4px 10px; background:#1976d2;">Stampa
-                        biglietto</a>
+                    <a href="{{ url_for('print_ticket', booking_id=t.id) }}" target="_blank"
+                        class="btn btn-primary btn-sm">Stampa biglietto</a>
                     {% endif %}
                 </td>
                 <td>
-                    <form method="post" action="{{ url_for('delete_transaction', booking_id=t.id) }}"
-                        style="display:inline;"
+                    <form method="post" action="{{ url_for('delete_transaction', booking_id=t.id) }}" class="d-inline"
                         onsubmit="return confirm('Sei sicuro di voler eliminare questa prenotazione? I posti {{ t.seats }} verranno liberati e la transazione sarà cancellata definitivamente.');">
-                        <button type="submit" class="btn-back"
-                            style="margin-left:4px; font-size:0.95em; padding:4px 10px; background:#dc3545; color:white;">Elimina</button>
+                        <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
                     </form>
                 </td>
             </tr>

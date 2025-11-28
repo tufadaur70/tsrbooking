@@ -1,207 +1,55 @@
-<!DOCTYPE html>
-<html lang="it">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Biglietto Prenotazione</title>
-    <style>
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background: #fff;
-            margin: 0;
-            padding: 0;
-        }
+{% block content %}
+<div class="ticket-container">
+    <button class="print-btn btn btn-info" onclick="window.print()">📄 Stampa Biglietto</button>
 
-        .ticket-container {
-            max-width: 420px;
-            margin: 30px auto;
-            background: #f9f9f9;
-            border-radius: 16px;
-            box-shadow: 0 2px 12px #0001;
-            padding: 24px 10px 18px 10px;
-        }
-
-        .ticket-header {
-            text-align: center;
-            margin-bottom: 12px;
-        }
-
-        .ticket-header img {
-            width: 100px;
-            margin-bottom: 6px;
-        }
-
-        .ticket-header h2 {
-            color: #e53935;
-            margin-bottom: 6px;
-        }
-
-        .ticket-poster {
-            text-align: center;
-            margin-bottom: 14px;
-        }
-
-        .ticket-poster img {
-            max-width: 220px;
-            width: 100%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px #0002;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .ticket-details,
-        .ticket-extra {
-            font-size: 1.08em;
-            color: #222;
-            margin-bottom: 14px;
-            text-align: center;
-        }
-
-        .ticket-extra {
-            font-size: 0.98em;
-            color: #444;
-            margin-bottom: 10px;
-        }
-
-        .ticket-qr {
-            text-align: center;
-            margin-bottom: 14px;
-        }
-
-        .ticket-qr img {
-            width: 120px;
-            height: 120px;
-            border-radius: 12px;
-            box-shadow: 0 1px 8px #0001;
-        }
-
-        .ticket-footer {
-            text-align: center;
-            color: #555;
-            font-size: 0.98em;
-            margin-top: 12px;
-        }
-
-        .print-btn {
-            display: block;
-            margin: 0 auto 14px auto;
-            background: #1976d2;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            padding: 8px 18px;
-            font-size: 1em;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .ticket-home-link {
-            display: block;
-            text-align: center;
-            margin-top: 18px;
-        }
-
-        .ticket-home-link a {
-            background: #1976d2;
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 24px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-
-        @media (max-width: 600px) {
-            .ticket-container {
-                max-width: 99vw;
-                margin: 4vw 1vw;
-                padding: 4vw 2vw 4vw 2vw;
-                border-radius: 10px;
-            }
-
-            .ticket-header img {
-                width: 70px;
-            }
-
-            .ticket-poster img {
-                max-width: 98vw;
-            }
-
-            .print-btn {
-                width: 100%;
-                font-size: 1em;
-                padding: 12px 0;
-            }
-        }
-
-        @media print {
-            .print-btn {
-                display: none;
-            }
-
-            .ticket-container {
-                box-shadow: none;
-                background: #fff;
-                margin: 0 auto !important;
-                max-width: 340px !important;
-                min-height: 0 !important;
-                padding: 0 !important;
-                border-radius: 0 !important;
-                page-break-after: always;
-            }
-
-            html,
-            body {
-                background: #fff !important;
-            }
-
-            .ticket-home-link {
-                display: none !important;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="ticket-container">
-        <button class="print-btn" onclick="window.print()">Stampa</button>
-        <div class="ticket-header">
-            <img src="/static/img/logo.png" alt="Logo Teatro San Raffaele">
-            <h2>Teatro San Raffaele</h2>
-            <h3>{{ event.title }}</h3>
-        </div>
-        {% if event.poster_url %}
-        <div class="ticket-poster">
-            <img src="{{ event.poster_url }}" alt="Locandina spettacolo">
-        </div>
-        {% endif %}
-        <div class="ticket-details">
-            <h3>{{ event.date }} : {{ event.time }}</h3><br>
-        </div>
-        <div class="ticket-details">
-            <b>Nominativo:</b> {{ booking.name }}<br>
-            <b>Email:</b> {{ booking.email }}<br>
-            <h3>Posti:{{ booking.seats }}</h3> <br>
-            <b>Ticket N°:</b> {{ booking.id }}<br>
-        </div>
-        <div class="ticket-extra">
-            <b>Stato:</b>
-            {% if booking.status == 1 %}In attesa{% elif booking.status == 2 %}Pagato{% elif booking.status == 3
-            %}Cassa{% else %}Sconosciuto{% endif %}<br>
-            <b>Data creazione:</b> {{ booking.created_at }}
-        </div>
-        <div class="ticket-footer">
-            Grazie per l'Acquisto<br>
-            <span style="font-size:0.92em;color:#aaa;">Powered by tsrbooking</span>
-        </div>
-        <div class="ticket-home-link" style="text-align:center; margin-top:18px;">
-            <a href="{{ url_for('dashboard') }}" class="btn-back"
-                style="background:#1976d2; color:#fff; text-decoration:none; padding:10px 24px; border-radius:6px; font-weight:bold;">Torna
-                alla dashboard</a>
-        </div>
+    <div class="ticket-header">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Teatro San Raffaele">
+        <h2>Teatro San Raffaele</h2>
+        <h3>{{ event.title }}</h3>
     </div>
-</body>
 
-</html>
+    {% if event.poster_url %}
+    <div class="ticket-poster">
+        <img src="{{ event.poster_url }}" alt="Locandina spettacolo">
+    </div>
+    {% endif %}
+
+    <div class="ticket-details">
+        <h3>📅 {{ event.date }} - ⏰ {{ event.time }}</h3>
+        <p><strong>💶 Prezzo:</strong> €{{ "%.2f"|format(event.price) }}</p>
+    </div>
+
+    <div class="ticket-details">
+        <p><strong>👤 Nominativo:</strong> {{ booking.name }}</p>
+        <p><strong>📧 Email:</strong> {{ booking.email }}</p>
+        <h3>🎫 Posti: {{ booking.seats }}</h3>
+        <p><strong>🔢 Ticket N°:</strong> {{ booking.id }}</p>
+    </div>
+
+    <div class="ticket-extra">
+        <p><strong>📊 Stato:</strong>
+            {% if booking.status == 1 %}
+            <span class="badge badge-pending">In attesa</span>
+            {% elif booking.status == 2 %}
+            <span class="badge badge-paid">Pagato</span>
+            {% elif booking.status == 3 %}
+            <span class="badge badge-validated">Cassa</span>
+            {% else %}
+            <span class="badge badge-unknown">Sconosciuto</span>
+            {% endif %}
+        </p>
+        <p><strong>📅 Data creazione:</strong> {{ booking.created_at }}</p>
+    </div>
+
+    <div class="ticket-footer">
+        <p>✨ Grazie per l'acquisto! ✨</p>
+        <small class="text-muted">Powered by TSR Booking System</small>
+    </div>
+
+    <div class="ticket-home-link text-center mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">🏠 Torna alla Dashboard</a>
+    </div>
+</div>
+{% endblock %}

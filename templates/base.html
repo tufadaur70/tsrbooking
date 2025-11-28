@@ -27,10 +27,19 @@
     </div>
   </div>
   <div class="main-content">
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-    {% for message in messages %}
-    <div class="flash-message">{{ message }}</div>
+    {% for category, message in messages %}
+    <div class="flash-message flash-{{ category }}">
+      <strong>
+        {% if category == 'error' %}⚠️
+        {% elif category == 'success' %}✅
+        {% elif category == 'warning' %}⚡
+        {% elif category == 'info' %}ℹ️
+        {% endif %}
+      </strong>
+      {{ message }}
+    </div>
     {% endfor %}
     {% endif %}
     {% endwith %}

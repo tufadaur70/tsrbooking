@@ -1,9 +1,12 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+import logging
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import stripe
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import BadRequest, NotFound, InternalServerError
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
+from functools import wraps
 
 # Import moduli locali
 from config import *
@@ -12,11 +15,34 @@ from email_service import send_booking_email_html
 from auth import login_required, check_admin_credentials
 from booking_service import *
 
+# Configurazione logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file upload
 
 # Configurazione Stripe
 stripe.api_key = STRIPE_SECRET_KEY
+
+# Error handlers
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    logger.error(f"Internal server error: {error}")
+    return render_template('500.html'), 500
+
+@app.errorhandler(BadRequest)
+def bad_request_error(error):
+    flash('Richiesta non valida', 'error')
+    return redirect(url_for('index'))
 
 # Context processor per template
 @app.context_processor
@@ -32,49 +58,100 @@ scheduler.start()
 
 @app.route('/')
 def index():
-    """Homepage con lista eventi"""
-    events = get_all_events()
-    return render_template('index.html', events=events)
+    """Homepage con lista eventi visibili"""
+    try:
+        events = get_all_events()
+        logger.info(f"Caricati {len(events)} eventi visibili per homepage")
+        return render_template('index.html', events=events)
+    except Exception as e:
+        logger.error(f"Errore nel caricamento eventi: {e}")
+        flash('Errore nel caricamento degli eventi', 'error')
+        return render_template('index.html', events=[])
 
-@app.route('/admin', methods=['GET','POST'])
+@app.route('/admin', methods=['GET', 'POST'])
 def admin():
-    """Login admin"""
-    error = None
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+    """Login admin con validazione migliorata"""
+    if request.method == 'GET':
+        return render_template('login.html')
+    
+    try:
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        
+        if not username or not password:
+            flash('Username e password sono obbligatori', 'error')
+            return render_template('login.html')
+        
         if check_admin_credentials(username, password):
             session['logged_in'] = True
+            session['username'] = username
+            logger.info(f"Login admin riuscito per {username}")
+            flash('Login effettuato con successo', 'success')
             return redirect(url_for('dashboard'))
         else:
-            error = 'Credenziali non valide'
-    return render_template('login.html', error=error)
+            logger.warning(f"Tentativo login fallito per {username}")
+            flash('Credenziali non valide', 'error')
+            return render_template('login.html')
+    
+    except Exception as e:
+        logger.error(f"Errore durante login: {e}")
+        flash('Errore interno durante il login', 'error')
+        return render_template('login.html')
 
 @app.route("/logout")
+@login_required
 def logout():
-    """Logout admin"""
-    session['logged_in'] = False
+    """Logout admin sicuro"""
+    username = session.get('username', 'unknown')
+    session.clear()
+    logger.info(f"Logout effettuato per {username}")
+    flash('Logout effettuato con successo', 'info')
     return redirect(url_for('admin'))
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
     """Dashboard admin con statistiche eventi"""
-    events = get_all_events_admin()
-    event_list = []
-    
-    for event in events:
-        stats = get_event_stats(event['id'])
-        event_list.append({
-            'id': event['id'],
-            'title': event['title'],
-            'date': event['date'],
-            'sold': stats['sold'],
-            'validated': stats['validated'],
-            'visible': event['visible'],
-        })
-    
-    return render_template('dashboard.html', events=event_list)
+    try:
+        events = get_all_events_admin()
+        event_list = []
+        
+        for event in events:
+            try:
+                stats = get_event_stats(event['id'])
+                event_list.append({
+                    'id': event['id'],
+                    'title': event['title'],
+                    'date': event['date'],
+                    'time': event['time'],
+                    'price': event['price'],
+                    'sold': stats['sold'],
+                    'validated': stats['validated'],
+                    'pending': stats['pending'],
+                    'visible': event['visible'],
+                })
+            except Exception as e:
+                logger.error(f"Errore calcolo statistiche evento {event['id']}: {e}")
+                # Aggiungi evento senza statistiche
+                event_list.append({
+                    'id': event['id'],
+                    'title': event['title'],
+                    'date': event['date'],
+                    'time': event['time'],
+                    'price': event['price'],
+                    'sold': 0,
+                    'validated': 0,
+                    'pending': 0,
+                    'visible': event['visible'],
+                })
+        
+        logger.info(f"Dashboard caricata con {len(event_list)} eventi")
+        return render_template('dashboard.html', events=event_list)
+        
+    except Exception as e:
+        logger.error(f"Errore caricamento dashboard: {e}")
+        flash('Errore nel caricamento della dashboard', 'error')
+        return render_template('dashboard.html', events=[])
 
 # ---------- GESTIONE EVENTI ----------
 

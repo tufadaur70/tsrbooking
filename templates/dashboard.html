@@ -2,14 +2,13 @@
 
 {% block content %}
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<h2 style="text-align:center; margin-bottom: 32px;">Dashboard Eventi</h2>
-
-<div style="text-align:right; margin-bottom: 18px;">
-  <a href="{{ url_for('add_event') }}" class="btn-new-event">+ Nuovo evento</a>
+<div class="d-flex justify-between align-center mb-4">
+  <h2 class="mb-0">Dashboard Eventi</h2>
+  <a href="{{ url_for('add_event') }}" class="btn btn-success">+ Nuovo evento</a>
 </div>
 
-<div class="dashboard-table-wrapper">
-  <table class="dashboard-table">
+<div class="table-wrapper">
+  <table class="table">
     <thead>
       <tr>
         <th>Evento</th>
@@ -30,9 +29,9 @@
         <td>{{ e.date }}</td>
         <td>
           {% if e.visible == 1 %}
-          <span style="color: green; font-weight: bold;">● Visibile</span>
+          <span class="badge badge-visible">Visibile</span>
           {% else %}
-          <span style="color: red; font-weight: bold;">● Nascosto</span>
+          <span class="badge badge-hidden">Nascosto</span>
           {% endif %}
         </td>
         <td>{{ e.sold }}</td>
