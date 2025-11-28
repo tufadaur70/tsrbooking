@@ -38,6 +38,10 @@ def validate_booking_form(name, email, selected_seats, booked_seats, unavailable
     if not selected_seats:
         return False, 'Seleziona almeno un posto!'
     
+    # Limite massimo di 10 posti per acquisto
+    if len(selected_seats) > 10:
+        return False, 'Puoi selezionare massimo 10 posti per acquisto!'
+    
     if not name or not email:
         return False, 'Inserisci nome ed email!'
     
@@ -56,6 +60,10 @@ def validate_admin_booking_form(name, selected_seats, booked_seats, unavailable_
     """
     if not selected_seats:
         return False, 'Seleziona almeno un posto!'
+    
+    # Limite massimo di 10 posti per acquisto (anche per admin)
+    if len(selected_seats) > 10:
+        return False, 'Puoi selezionare massimo 10 posti per prenotazione!'
     
     if not name:
         return False, 'Inserisci il nome del cliente!'

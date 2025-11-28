@@ -63,26 +63,63 @@
     </form>
 </div>
 <script>
+    const MAX_SEATS = 10;
+
     function updateSelectedSeats() {
         const checked = Array.from(document.querySelectorAll('input[name="seats"]:checked'));
         const div = document.getElementById('selected-seats');
         const totalSpan = document.getElementById('total-price');
+        const submitButton = document.querySelector('.btn-book');
         const price = {{ event.price|default (0) | tojson
     }};
+
     if (checked.length === 0) {
         div.textContent = "Nessun posto selezionato.";
         totalSpan.textContent = "0";
+        submitButton.disabled = true;
+    } else if (checked.length > MAX_SEATS) {
+        // Deseleziona l'ultimo posto selezionato se supera il limite
+        const lastChecked = checked[checked.length - 1];
+        lastChecked.checked = false;
+        updateSelectedSeats(); // Richiama la funzione per aggiornare
+        return;
     } else {
-        div.textContent = "Posti selezionati: " + checked.map(cb => cb.value).join(', ');
+        div.innerHTML = `Posti selezionati (${checked.length}/${MAX_SEATS}): ` + checked.map(cb => cb.value).join(', ');
         totalSpan.textContent = (checked.length * price).toFixed(2);
+        submitButton.disabled = false;
     }
+
+    // Aggiorna la grafica dei posti selezionati
     document.querySelectorAll('.seat').forEach(label => {
         label.classList.remove('selected');
     });
     checked.forEach(cb => {
         cb.parentElement.classList.add('selected');
     });
-  }
-    document.addEventListener('DOMContentLoaded', updateSelectedSeats);
+
+    // Disabilita i posti rimanenti se si raggiunge il limite
+    const allSeats = document.querySelectorAll('input[name="seats"]');
+    allSeats.forEach(seat => {
+        if (!seat.checked && checked.length >= MAX_SEATS) {
+            seat.disabled = true;
+            seat.parentElement.style.opacity = '0.5';
+            seat.parentElement.style.cursor = 'not-allowed';
+        } else if (!seat.checked) {
+            seat.disabled = false;
+            seat.parentElement.style.opacity = '1';
+            seat.parentElement.style.cursor = 'pointer';
+        }
+    });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        updateSelectedSeats();
+        // Aggiungi messaggio informativo
+        const selectedSeatsDiv = document.getElementById('selected-seats');
+        const infoMessage = document.createElement('div');
+        infoMessage.style.cssText = 'font-size: 0.9em; color: #666; margin-top: 8px; text-align: center;';
+        infoMessage.textContent = `Massimo ${MAX_SEATS} posti per prenotazione`;
+        selectedSeatsDiv.parentElement.insertBefore(infoMessage, selectedSeatsDiv.nextSibling);
+    });
 </script>
 {% endblock %}
