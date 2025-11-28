@@ -234,7 +234,7 @@ def generate_email_ticket_pdf(booking, event):
     buffer.seek(0)
     return buffer.getvalue()
 
-
+#PEPPE
 def generate_tickets_summary_pdf(bookings, event):
     """
     Genera un PDF riassuntivo con tutti i biglietti di un evento
