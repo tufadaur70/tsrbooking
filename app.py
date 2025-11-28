@@ -11,9 +11,10 @@ from functools import wraps
 # Import moduli locali
 from config import *
 from database import *
-from email_service import send_booking_email_html
+from email_service import send_booking_email_html, send_booking_confirmation_with_pdf
 from auth import login_required, check_admin_credentials
 from booking_service import *
+from pdf_generator import generate_ticket_pdf, generate_tickets_summary_pdf
 
 # Configurazione logging
 logging.basicConfig(
@@ -338,8 +339,8 @@ def admin_book_seats(event_id):
         # Crea prenotazione con status 3 (cassa)
         seats_str = ','.join(selected_seats)
         booking_id = create_booking(event_id, name, email, seats_str, status=3)
-        flash('Prenotazione registrata con successo!')
-        return redirect(url_for('print_ticket', booking_id=booking_id))
+        flash('Prenotazione registrata con successo!', 'success')
+        return redirect(url_for('dashboard'))
 
     return render_template(
         'admin_book_seats.html',
@@ -431,6 +432,7 @@ def event_transactions(event_id):
     
     return render_template(
         'event_transactions.html',
+        event_id=event_id,
         event_title=event['title'] if event else 'Evento sconosciuto',
         transactions=transactions
     )
@@ -448,7 +450,7 @@ def resend_ticket(booking_id):
         flash('Solo le prenotazioni pagate o validate possono ricevere il biglietto.', 'warning')
         return redirect(request.referrer or url_for('dashboard'))
     
-    send_booking_email_html(booking_id)
+    send_booking_confirmation_with_pdf(booking_id)
     flash('Biglietto inviato nuovamente a ' + booking['email'], 'success')
     return redirect(request.referrer or url_for('dashboard'))
 
@@ -472,16 +474,75 @@ def delete_transaction(booking_id):
     flash(f'Prenotazione eliminata con successo. Posti {seats_info} liberati per {customer_name}.', 'success')
     return redirect(request.referrer or url_for('dashboard'))
 
-@app.route('/print_ticket/<int:booking_id>')
+@app.route('/generate_ticket_pdf/<int:booking_id>')
 @login_required
-def print_ticket(booking_id):
-    """Pagina per stampare ticket"""
-    booking = get_booking_by_id(booking_id)
-    if not booking:
-        return 'Prenotazione non trovata', 404
-    
-    event = get_event_by_id(booking['event_id'])
-    return render_template('print_ticket.html', booking=booking, event=event)
+def generate_ticket_pdf_route(booking_id):
+    """Genera PDF del biglietto per una prenotazione"""
+    try:
+        booking = get_booking_by_id(booking_id)
+        if not booking:
+            flash('Prenotazione non trovata.', 'error')
+            return redirect(url_for('dashboard'))
+        
+        event = get_event_by_id(booking['event_id'])
+        if not event:
+            flash('Evento non trovato.', 'error')
+            return redirect(url_for('dashboard'))
+        
+        # Genera PDF
+        pdf_data = generate_ticket_pdf(booking, event)
+        
+        # Prepara nome file
+        filename = f"biglietto_{event['title'].replace(' ', '_')}_{booking['id']}.pdf"
+        
+        # Ritorna PDF come download
+        from flask import make_response
+        response = make_response(pdf_data)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f'Errore generazione PDF: {str(e)}')
+        flash('Errore durante la generazione del PDF.', 'error')
+        return redirect(url_for('dashboard'))
+
+@app.route('/generate_event_summary_pdf/<int:event_id>')
+@login_required
+def generate_event_summary_pdf_route(event_id):
+    """Genera PDF riassuntivo di tutte le prenotazioni di un evento"""
+    try:
+        event = get_event_by_id(event_id)
+        if not event:
+            flash('Evento non trovato.', 'error')
+            return redirect(url_for('dashboard'))
+        
+        # Ottieni tutte le transazioni dell'evento
+        bookings = get_event_transactions(event_id)
+        
+        if not bookings:
+            flash('Nessuna prenotazione trovata per questo evento.', 'warning')
+            return redirect(url_for('event_transactions', event_id=event_id))
+        
+        # Genera PDF riassuntivo
+        pdf_data = generate_tickets_summary_pdf(bookings, event)
+        
+        # Prepara nome file
+        filename = f"riepilogo_{event['title'].replace(' ', '_')}.pdf"
+        
+        # Ritorna PDF come download
+        from flask import make_response
+        response = make_response(pdf_data)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f'Errore generazione PDF riepilogo: {str(e)}')
+        flash('Errore durante la generazione del PDF riepilogo.', 'error')
+        return redirect(url_for('dashboard'))
 
 # ---------- AVVIO APPLICAZIONE ----------
 

@@ -2,10 +2,13 @@
 
 {% block content %}
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<h2 class="text-center mb-5">Transazioni per l'evento: {{ event_title }}</h2>
-<p class="text-center mb-4">
+<h2 class="text-center mb-3">Transazioni per l'evento: {{ event_title }}</h2>
+<div class="text-center mb-4">
+    <a href="{{ url_for('generate_event_summary_pdf_route', event_id=event_id) }}" class="btn btn-warning me-2">
+        📊 Riepilogo PDF
+    </a>
     <a href="{{ url_for('dashboard') }}" class="btn btn-dark">&larr; Torna alla dashboard</a>
-</p>
+</div>
 
 <div class="table-wrapper">
     <table class="table">
@@ -17,9 +20,9 @@
                 <th>Email</th>
                 <th>Posti</th>
                 <th>Stato</th>
-                <th></th>
-                <th></th>
-                <th></th>
+                <th>PDF</th>
+                <th>Email</th>
+                <th>Elimina</th>
             </tr>
         </thead>
         <tbody>
@@ -43,21 +46,32 @@
                 </td>
                 <td>
                     {% if t.status in [2,3] %}
-                    <form method="post" action="{{ url_for('resend_ticket', booking_id=t.id) }}" class="d-inline">
-                        <button type="submit" class="btn btn-info btn-sm">Invia biglietto</button>
-                    </form>
+                    <a href="{{ url_for('generate_ticket_pdf_route', booking_id=t.id) }}" class="btn btn-info btn-sm"
+                        title="Scarica PDF biglietto">
+                        📄 PDF
+                    </a>
+                    {% else %}
+                    <span class="text-muted">-</span>
                     {% endif %}
                 </td>
                 <td>
                     {% if t.status in [2,3] %}
-                    <a href="{{ url_for('print_ticket', booking_id=t.id) }}" target="_blank"
-                        class="btn btn-primary btn-sm">Stampa biglietto</a>
+                    <form method="post" action="{{ url_for('resend_ticket', booking_id=t.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-success btn-sm" title="Invia biglietto PDF via email">
+                            ✉️ Email
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted">-</span>
                     {% endif %}
                 </td>
                 <td>
-                    <form method="post" action="{{ url_for('delete_transaction', booking_id=t.id) }}" class="d-inline"
-                        onsubmit="return confirm('Sei sicuro di voler eliminare questa prenotazione? I posti {{ t.seats }} verranno liberati e la transazione sarà cancellata definitivamente.');">
-                        <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
+                    <form method="post" action="{{ url_for('delete_transaction', booking_id=t.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm"
+                            onclick="return confirm('Sei sicuro di voler eliminare questa transazione? I posti verranno liberati.')"
+                            title="Elimina transazione">
+                            🗑️ Elimina
+                        </button>
                     </form>
                 </td>
             </tr>

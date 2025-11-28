@@ -131,6 +131,26 @@ def update_booking_status(booking_id, status):
     conn.commit()
     conn.close()
 
+def get_event_transactions(event_id):
+    """Ottiene tutte le transazioni per un evento specifico"""
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT id, event_id, name, email, seats, status, created_at
+            FROM bookings 
+            WHERE event_id = ?
+            ORDER BY created_at DESC
+        ''', (event_id,))
+        
+        columns = [description[0] for description in cursor.description]
+        transactions = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        
+        return transactions
+        
+    finally:
+        conn.close()
+
 def delete_booking(booking_id):
     """Elimina prenotazione"""
     conn = get_db()

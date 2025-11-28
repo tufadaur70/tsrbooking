@@ -1627,19 +1627,6 @@ body {
     margin-top: 12px;
 }
 
-.print-btn {
-    display: block;
-    margin: 0 auto 14px auto;
-    background: #1976d2;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    padding: 8px 18px;
-    font-size: 1em;
-    font-weight: 500;
-    cursor: pointer;
-}
-
 .ticket-home-link {
     display: block;
     text-align: center;
@@ -1669,38 +1656,6 @@ body {
 
     .ticket-poster img {
         max-width: 98vw;
-    }
-
-    .print-btn {
-        width: 100%;
-        font-size: 1em;
-        padding: 12px 0;
-    }
-}
-
-@media print {
-    .print-btn {
-        display: none;
-    }
-
-    .ticket-container {
-        box-shadow: none;
-        background: #fff;
-        margin: 0 auto !important;
-        max-width: 340px !important;
-        min-height: 0 !important;
-        padding: 0 !important;
-        border-radius: 0 !important;
-        page-break-after: always;
-    }
-
-    html,
-    body {
-        background: #fff !important;
-    }
-
-    .ticket-home-link {
-        display: none !important;
     }
 }
 
@@ -1841,6 +1796,35 @@ body {
     z-index: 1 !important;
 }
 
+
+/* PDF BUTTONS STYLING */
+\n.btn-pdf {
+    \n background: linear-gradient(135deg, var(--error-color), var(--error-light));
+    \n color: var(--text-inverse);
+    \n font-size: 0.9em;
+    \n padding: 6px 12px;
+    \n border-radius: var(--radius-md);
+    \n text-decoration: none;
+    \n display: inline-flex;
+    \n align-items: center;
+    \n gap: var(--spacing-xs);
+    \n transition: all var(--transition-standard);
+    \n
+}
+
+\n\n.btn-pdf:hover {
+    \n background: linear-gradient(135deg, var(--error-dark), var(--error-color));
+    \n transform: translateY(-1px);
+    \n box-shadow: var(--shadow-md);
+    \n
+}
+
+\n\n.me-2 {
+    \n margin-right: var(--spacing-sm);
+    \n
+}
+
+\n\n\n
 
 /* FORM EVENTI MIGLIORATI */
 .container-fluid {
