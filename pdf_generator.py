@@ -2,6 +2,27 @@
 Modulo per la generazione di PDF dei biglietti
 """
 
+def debug_image_paths(image_path):
+    """Debug function per controllare i percorsi delle immagini"""
+    import os
+    print(f"=== DEBUG PERCORSO IMMAGINE ===")
+    print(f"Path richiesto: {image_path}")
+    print(f"Working directory: {os.getcwd()}")
+    print(f"Script directory: {os.path.dirname(__file__)}")
+    
+    possible_paths = [
+        os.path.join(os.path.dirname(__file__), image_path.lstrip('/')),
+        os.path.join(os.getcwd(), image_path.lstrip('/')),
+        image_path.lstrip('/'),
+        os.path.join('static', image_path.lstrip('/static/'))
+    ]
+    
+    for i, path in enumerate(possible_paths):
+        exists = os.path.exists(path)
+        print(f"Percorso {i+1}: {path} - {'ESISTE' if exists else 'NON ESISTE'}")
+    print("==============================")
+    return possible_paths
+
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import cm, inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
@@ -111,13 +132,36 @@ def generate_email_ticket_pdf(booking, event):
     
     # Header con logo se esiste
     try:
-        if os.path.exists('static/img/logo.png'):
-            logo = Image('static/img/logo.png', width=1.2*inch, height=1.2*inch)
-            logo.hAlign = 'CENTER'
-            story.append(logo)
-            story.append(Spacer(1, 0.1*inch))
-    except:
-        pass
+        import os
+        # Prova diversi percorsi possibili per il logo
+        base_dir = os.environ.get('APP_BASE_DIR', os.path.dirname(__file__))
+        logo_paths = [
+            os.path.join(base_dir, 'static', 'img', 'logo.png'),
+            os.path.join(os.path.dirname(__file__), 'static', 'img', 'logo.png'),
+            os.path.join(os.getcwd(), 'static', 'img', 'logo.png'),
+            'static/img/logo.png',
+            './static/img/logo.png'
+        ]
+        
+        logo_loaded = False
+        for logo_path in logo_paths:
+            if os.path.exists(logo_path):
+                logo = Image(logo_path, width=1.2*inch, height=1.2*inch)
+                logo.hAlign = 'CENTER'
+                story.append(logo)
+                story.append(Spacer(1, 0.1*inch))
+                logo_loaded = True
+                break
+        
+        if not logo_loaded:
+            # Fallback: aggiungi spazio per il logo mancante
+            print("Warning: Logo non trovato in nessun percorso")
+            story.append(Spacer(1, 0.3*inch))
+            
+    except Exception as e:
+        # Log dell'errore ma continua
+        print(f"Errore caricamento logo: {e}")
+        story.append(Spacer(1, 0.3*inch))
     
     # Titolo principale del teatro
     story.append(Paragraph("🎭 BIGLIETTO D'INGRESSO 🎭", title_style))
@@ -132,7 +176,11 @@ def generate_email_ticket_pdf(booking, event):
         try:
             poster_added = False
             if event['poster_url'].startswith('http'):
-                response = requests.get(event['poster_url'], timeout=5)
+                # URL esterno
+                import requests
+                response = requests.get(event['poster_url'], timeout=10, headers={
+                    'User-Agent': 'Mozilla/5.0 (compatible; TSR-PDF-Generator/1.0)'
+                })
                 if response.status_code == 200:
                     img_buffer = io.BytesIO(response.content)
                     poster = Image(img_buffer, width=1.8*inch, height=2.2*inch)
@@ -141,15 +189,57 @@ def generate_email_ticket_pdf(booking, event):
                     story.append(Spacer(1, 0.1*inch))
                     poster_added = True
             else:
-                poster_path = event['poster_url'].lstrip('/')
-                if os.path.exists(poster_path):
-                    poster = Image(poster_path, width=1.8*inch, height=2.2*inch)
-                    poster.hAlign = 'CENTER'
-                    story.append(poster)
-                    story.append(Spacer(1, 0.1*inch))
-                    poster_added = True
-        except:
-            pass
+                # File locale - prova diversi percorsi
+                base_dir = os.environ.get('APP_BASE_DIR', os.path.dirname(__file__))
+                poster_paths = [
+                    os.path.join(base_dir, event['poster_url'].lstrip('/')),
+                    os.path.join(os.path.dirname(__file__), event['poster_url'].lstrip('/')),
+                    os.path.join(os.getcwd(), event['poster_url'].lstrip('/')),
+                    event['poster_url'].lstrip('/'),
+                    os.path.join('static', event['poster_url'].lstrip('/static/'))
+                ]
+                
+                for poster_path in poster_paths:
+                    if os.path.exists(poster_path):
+                        poster = Image(poster_path, width=1.8*inch, height=2.2*inch)
+                        poster.hAlign = 'CENTER'
+                        story.append(poster)
+                        story.append(Spacer(1, 0.1*inch))
+                        poster_added = True
+                        break
+                        
+            if not poster_added:
+                # Fallback: placeholder testuale
+                placeholder_style = ParagraphStyle(
+                    'PlaceholderStyle',
+                    parent=styles['Normal'],
+                    fontSize=14,
+                    textColor=colors.HexColor('#8B4513'),
+                    alignment=TA_CENTER,
+                    backColor=colors.HexColor('#F5F5DC'),
+                    borderColor=colors.HexColor('#8B4513'),
+                    borderWidth=1,
+                    borderPadding=20
+                )
+                story.append(Paragraph("🎭<br/>POSTER<br/>NON DISPONIBILE", placeholder_style))
+                story.append(Spacer(1, 0.1*inch))
+                
+        except Exception as e:
+            print(f"Errore caricamento poster: {e}")
+            # Aggiungi placeholder in caso di errore
+            placeholder_style = ParagraphStyle(
+                'PlaceholderStyle',
+                parent=styles['Normal'],
+                fontSize=14,
+                textColor=colors.HexColor('#8B4513'),
+                alignment=TA_CENTER,
+                backColor=colors.HexColor('#F5F5DC'),
+                borderColor=colors.HexColor('#8B4513'),
+                borderWidth=1,
+                borderPadding=20
+            )
+            story.append(Paragraph("🎭<br/>ERRORE CARICAMENTO<br/>POSTER", placeholder_style))
+            story.append(Spacer(1, 0.1*inch))
     
     # Tabella con dettagli biglietto
     seats_count = len(booking['seats'].split(','))
