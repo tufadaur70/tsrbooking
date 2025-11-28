@@ -37,27 +37,27 @@
         <td>{{ e.sold }}</td>
         <td>{{ e.validated }}</td>
         <td>
-          <a href="{{ url_for('event_transactions', event_id=e.id) }}" class="btn-table">Transazioni</a>
+          <a href="{{ url_for('event_transactions', event_id=e.id) }}" class="btn btn-info btn-sm">📊 Transazioni</a>
         </td>
         <td class="dashboard-actions">
-          <a href="{{ url_for('edit_event', event_id=e.id) }}" class="btn-table btn-edit">Modifica</a>
+          <a href="{{ url_for('edit_event', event_id=e.id) }}" class="btn btn-primary btn-sm">✏️ Modifica</a>
         </td>
         <td>
           {% if e.visible == 1 %}
           <form action="{{ url_for('hide_event_route', event_id=e.id) }}" method="post" style="display:inline;"
             onsubmit="return confirm('Sei sicuro di voler nascondere questo evento dalla vista pubblica?');">
-            <button type="submit" class="btn-table" style="background:#ff6b6b;">Nascondi</button>
+            <button type="submit" class="btn btn-warning btn-sm">🙈 Nascondi</button>
           </form>
           {% else %}
           <form action="{{ url_for('show_event_route', event_id=e.id) }}" method="post" style="display:inline;"
             onsubmit="return confirm('Sei sicuro di voler rendere visibile questo evento?');">
-            <button type="submit" class="btn-table" style="background:#51cf66;">Mostra</button>
+            <button type="submit" class="btn btn-success btn-sm">👁️ Mostra</button>
           </form>
           {% endif %}
         </td>
         <td>
-          <a href="{{ url_for('admin_book_seats', event_id=e.id) }}" class="btn-table"
-            style="background:#d2bd19;color:#000000;margin-top:6px;display:block;">Cassa</a>
+          <a href="{{ url_for('admin_book_seats', event_id=e.id) }}" class="btn btn-warning btn-sm"
+            style="display:block;">💰 Cassa</a>
         </td>
       </tr>
       {% else %}
