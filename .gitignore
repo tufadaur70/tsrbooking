@@ -1,8 +1,8 @@
 # File con dati sensibili
-.env
+#.env
 
 # Database
-data/cinema.db
+#data/cinema.db
 
 # Cache Python
 __pycache__/
@@ -30,10 +30,10 @@ ENV/
 Thumbs.db
 
 # Upload files (opzionale)
-static/posters/*.png
-static/posters/*.jpg
-static/posters/*.jpeg
-static/posters/*.gif
+#static/posters/*.png
+#static/posters/*.jpg
+#static/posters/*.jpeg
+#static/posters/*.gif
 
 # Backup files
 *_old.py
