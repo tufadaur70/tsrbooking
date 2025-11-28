@@ -8,14 +8,14 @@
     </div>
     <h2>{{ event.title }}</h2>
     <h3>{{ event.date }} alle {{ event.time }}</h3>
-    <div class="ticket-qrcode">
+    <div class="ticket-poster">
         {% if event.poster_url %}
         <img src="{{ event.poster_url }}" alt="Locandina evento" class="event-poster">
         {% else %}
         <div class="event-poster-placeholder">Nessuna locandina</div>
         {% endif %}
     </div>
-    <div class="ticket-info">
+    <div class="ticket-details">
         <div><b>Ticket N: {{ booking.id }}</b></div></br>
         <div>Email: {{ booking.email }}</div>
         <div>Nominativo: {{ booking.name }}</div></br>
@@ -27,7 +27,7 @@
         <button onclick="window.print()" class="btn-ticket">Scarica/Stampa biglietto</button>
         <a href="/" class="btn-home">Torna alla home</a>
     </div>
-    <div class="ticket-note">
+    <div class="ticket-footer">
         Riceverai una email con il tuo biglietto<br>
         Grazie per l'acquisto!
     </div>
