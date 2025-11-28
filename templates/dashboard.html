@@ -14,6 +14,7 @@
       <tr>
         <th>Evento</th>
         <th>Data</th>
+        <th>Stato</th>
         <th>Venduti Online</th>
         <th>Venduti Cassa</th>
         <th></th>
@@ -27,6 +28,13 @@
       <tr>
         <td>{{ e.title }}</td>
         <td>{{ e.date }}</td>
+        <td>
+          {% if e.visible == 1 %}
+          <span style="color: green; font-weight: bold;">● Visibile</span>
+          {% else %}
+          <span style="color: red; font-weight: bold;">● Nascosto</span>
+          {% endif %}
+        </td>
         <td>{{ e.sold }}</td>
         <td>{{ e.validated }}</td>
         <td>
@@ -36,11 +44,17 @@
           <a href="{{ url_for('edit_event', event_id=e.id) }}" class="btn-table btn-edit">Modifica</a>
         </td>
         <td>
-          <form action="{{ url_for('delete_event', event_id=e.id) }}" method="post" style="display:inline;"
-            onsubmit="return confirm('Sei sicuro di voler eliminare questo evento?');">
-            <button type="submit" class="btn-table btn-delete">Elimina</button>
+          {% if e.visible == 1 %}
+          <form action="{{ url_for('hide_event_route', event_id=e.id) }}" method="post" style="display:inline;"
+            onsubmit="return confirm('Sei sicuro di voler nascondere questo evento dalla vista pubblica?');">
+            <button type="submit" class="btn-table" style="background:#ff6b6b;">Nascondi</button>
           </form>
-
+          {% else %}
+          <form action="{{ url_for('show_event_route', event_id=e.id) }}" method="post" style="display:inline;"
+            onsubmit="return confirm('Sei sicuro di voler rendere visibile questo evento?');">
+            <button type="submit" class="btn-table" style="background:#51cf66;">Mostra</button>
+          </form>
+          {% endif %}
         </td>
         <td>
           <a href="{{ url_for('admin_book_seats', event_id=e.id) }}" class="btn-table"
@@ -49,7 +63,7 @@
       </tr>
       {% else %}
       <tr>
-        <td colspan="7" style="text-align:center; color:#888;">Nessun evento presente.</td>
+        <td colspan="9" style="text-align:center; color:#888;">Nessun evento presente.</td>
       </tr>
       {% endfor %}
     </tbody>

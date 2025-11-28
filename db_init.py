@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS events (
     date TEXT NOT NULL,
     time TEXT NOT NULL,
     price REAL NOT NULL,
-    poster_url TEXT         
+    poster_url TEXT,
+    visible INTEGER DEFAULT 1
 )
 """)
 

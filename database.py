@@ -25,7 +25,14 @@ def reset_transazioni_scadute():
     conn.close()
 
 def get_all_events():
-    """Ottieni tutti gli eventi"""
+    """Ottieni tutti gli eventi visibili"""
+    conn = get_db()
+    events = conn.execute('SELECT * FROM events WHERE visible = 1').fetchall()
+    conn.close()
+    return events
+
+def get_all_events_admin():
+    """Ottieni tutti gli eventi (inclusi quelli nascosti) per admin"""
     conn = get_db()
     events = conn.execute('SELECT * FROM events').fetchall()
     conn.close()
@@ -42,24 +49,38 @@ def create_event(title, date, time, price, poster_url=None):
     """Crea nuovo evento"""
     conn = get_db()
     conn.execute(
-        "INSERT INTO events (title, date, time, price, poster_url) VALUES (?, ?, ?, ?, ?)",
-        (title, date, time, price, poster_url)
+        "INSERT INTO events (title, date, time, price, poster_url, visible) VALUES (?, ?, ?, ?, ?, ?)",
+        (title, date, time, price, poster_url, 1)
     )
     conn.commit()
     conn.close()
 
-def update_event(event_id, title, date, time, price, poster_url):
+def update_event(event_id, title, date, time, price, poster_url, visible=1):
     """Aggiorna evento esistente"""
     conn = get_db()
     conn.execute(
-        "UPDATE events SET title=?, date=?, time=?, price=?, poster_url=? WHERE id=?",
-        (title, date, time, price, poster_url, event_id)
+        "UPDATE events SET title=?, date=?, time=?, price=?, poster_url=?, visible=? WHERE id=?",
+        (title, date, time, price, poster_url, visible, event_id)
     )
+    conn.commit()
+    conn.close()
+
+def hide_event(event_id):
+    """Nasconde evento impostando visible=0"""
+    conn = get_db()
+    conn.execute('UPDATE events SET visible=0 WHERE id=?', (event_id,))
+    conn.commit()
+    conn.close()
+
+def show_event(event_id):
+    """Rende visibile evento impostando visible=1"""
+    conn = get_db()
+    conn.execute('UPDATE events SET visible=1 WHERE id=?', (event_id,))
     conn.commit()
     conn.close()
 
 def delete_event(event_id):
-    """Elimina evento e relative prenotazioni"""
+    """Elimina definitivamente evento e relative prenotazioni (solo per emergenze)"""
     conn = get_db()
     conn.execute('DELETE FROM bookings WHERE event_id=?', (event_id,))
     conn.execute('DELETE FROM events WHERE id=?', (event_id,))

@@ -60,7 +60,7 @@ def logout():
 @login_required
 def dashboard():
     """Dashboard admin con statistiche eventi"""
-    events = get_all_events()
+    events = get_all_events_admin()
     event_list = []
     
     for event in events:
@@ -71,6 +71,7 @@ def dashboard():
             'date': event['date'],
             'sold': stats['sold'],
             'validated': stats['validated'],
+            'visible': event['visible'],
         })
     
     return render_template('dashboard.html', events=event_list)
@@ -130,19 +131,28 @@ def edit_event(event_id):
         # Formatta data
         dt = datetime.strptime(date, '%Y-%m-%d').strftime('%d/%m/%Y')
         
-        update_event(event_id, title, dt, time, price, poster_url)
+        update_event(event_id, title, dt, time, price, poster_url, event['visible'])
         flash('Evento modificato con successo!')
         return redirect(url_for('dashboard'))
 
     return render_template('edit_event.html', event=event)
 
-@app.route('/event/<int:event_id>/delete', methods=['POST'])
+@app.route('/event/<int:event_id>/hide', methods=['POST'])
 @login_required
-def delete_event(event_id):
-    """Elimina evento"""
-    from database import delete_event as db_delete_event
-    db_delete_event(event_id)
-    flash('Evento eliminato con successo!')
+def hide_event_route(event_id):
+    """Nasconde evento dalla vista pubblica"""
+    from database import hide_event
+    hide_event(event_id)
+    flash('Evento nascosto con successo!')
+    return redirect(url_for('dashboard'))
+
+@app.route('/event/<int:event_id>/show', methods=['POST'])
+@login_required
+def show_event_route(event_id):
+    """Rende visibile evento nella vista pubblica"""
+    from database import show_event
+    show_event(event_id)
+    flash('Evento reso visibile con successo!')
     return redirect(url_for('dashboard'))
 
 # ---------- PRENOTAZIONI UTENTE ----------
@@ -363,6 +373,26 @@ def resend_ticket(booking_id):
     
     send_booking_email_html(booking_id)
     flash('Biglietto inviato nuovamente a ' + booking['email'], 'success')
+    return redirect(request.referrer or url_for('dashboard'))
+
+@app.route('/delete_transaction/<int:booking_id>', methods=['POST'])
+@login_required
+def delete_transaction(booking_id):
+    """Elimina transazione e libera i posti"""
+    booking = get_booking_by_id(booking_id)
+    if not booking:
+        flash('Prenotazione non trovata.', 'danger')
+        return redirect(request.referrer or url_for('dashboard'))
+    
+    # Salva informazioni per il messaggio di conferma
+    event = get_event_by_id(booking['event_id'])
+    seats_info = booking['seats']
+    customer_name = booking['name']
+    
+    # Elimina la prenotazione
+    delete_booking(booking_id)
+    
+    flash(f'Prenotazione eliminata con successo. Posti {seats_info} liberati per {customer_name}.', 'success')
     return redirect(request.referrer or url_for('dashboard'))
 
 @app.route('/print_ticket/<int:booking_id>')
