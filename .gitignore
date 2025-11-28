@@ -2,7 +2,7 @@
 .env
 
 # Database
-#data/cinema.db
+data/cinema.db
 
 # Cache Python
 __pycache__/
