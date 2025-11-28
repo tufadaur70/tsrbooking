@@ -5,9 +5,10 @@
     <div class="ticket-header">
         <img src="/static/img/logo.png" alt="Logo Teatro San Raffaele">
         <div class="ticket-title">Teatro San Raffaele</div>
+
+        <h2>{{ event.title }}</h2>
+        <h3>{{ event.date }} alle {{ event.time }}</h3>
     </div>
-    <h2>{{ event.title }}</h2>
-    <h3>{{ event.date }} alle {{ event.time }}</h3>
     <div class="ticket-poster">
         {% if event.poster_url %}
         <img src="{{ event.poster_url }}" alt="Locandina evento" class="event-poster">
@@ -23,10 +24,7 @@
             <h3>Posti:{{ booking.seats }}</h3>
         </div>
     </div>
-    <div class="ticket-actions">
-        <button onclick="window.print()" class="btn-ticket">Scarica/Stampa biglietto</button>
-        <a href="/" class="btn-home">Torna alla home</a>
-    </div>
+
     <div class="ticket-footer">
         Riceverai una email con il tuo biglietto<br>
         Grazie per l'acquisto!
